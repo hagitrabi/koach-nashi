@@ -1,0 +1,9 @@
+node_modules
+dist
+.env
+.env.*
+
+# private data - never commit (phone numbers)
+seed/
+*.xlsx
+*.csv

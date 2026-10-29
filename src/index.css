@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Heebo", system-ui, sans-serif;
+  --color-brand: #128c4a;
+  --color-page: #f7f5f2;
+}
+
+body {
+  margin: 0;
+  background: var(--color-page);
+  font-family: var(--font-sans);
+  font-size: 16px;
+}
