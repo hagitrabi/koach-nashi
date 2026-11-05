@@ -6,63 +6,74 @@
 <meta name="robots" content="noindex, nofollow">
 <title>חלוקת פרסום – סבב מוצ״ש</title>
 <style>
-:root{--bg:#F7F5F2;--card:#fff;--ink:#241f2b;--mut:#6b6573;--pri:#5B3A70;--green:#128C4A;--line:#e7e1ec}
+:root{--bg:#0e0d1c;--card:#16152b;--card2:#1c1b36;--line:#2c2a4d;--txt:#f1effa;--mut:#9a97bd;--pur:#b79cff;--pur2:#7c5cff;--grn:#34d399;--pnk:#ff4d8d;--yel:#fbbf24}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Heebo,"Segoe UI",Arial,sans-serif;font-size:16px;line-height:1.45}
-header{background:var(--pri);color:#fff;padding:16px 16px 12px;position:sticky;top:0;z-index:5}
-h1{margin:0 0 4px;font-size:19px}
-.sub{font-size:13px;opacity:.9}
-.bar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.tab{flex:1;min-width:110px;min-height:44px;border:0;border-radius:12px;background:rgba(255,255,255,.18);color:#fff;font-size:16px;font-weight:600;cursor:pointer}
-.tab[aria-selected=true]{background:#fff;color:var(--pri)}
-input[type=search]{flex:1;min-width:180px;min-height:44px;border:0;border-radius:12px;padding:0 14px;font-size:16px}
-main{max-width:1100px;margin:0 auto;padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
-.card{background:var(--card);border-radius:16px;padding:14px;box-shadow:0 1px 4px rgba(40,20,60,.08);border:1px solid var(--line)}
-.who{font-weight:700;font-size:17px}
-.fld{color:var(--mut);font-size:14px;margin-bottom:8px}
-.lbl{font-size:13px;color:var(--mut);margin:8px 0 6px}
-.btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:48px;padding:8px 12px;margin-bottom:6px;border:1px solid var(--green);background:#f1faf5;color:#0b5d31;border-radius:12px;font-size:16px;text-align:right;cursor:pointer;font-family:inherit}
-.btn:hover,.btn:active{background:var(--green);color:#fff}
-.btn small{color:inherit;opacity:.8;font-size:13px}
+body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#25194d 0%,transparent 60%),var(--bg);color:var(--txt);font-family:Heebo,"Assistant",system-ui,Arial,sans-serif;font-size:16px;direction:rtl;min-height:100vh}
+header{max-width:1100px;margin:0 auto;padding:22px 16px 6px}
+h1{margin:0;font-size:26px;font-weight:800}
+.hello{color:var(--mut);font-size:14px;margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0 4px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 8px;text-align:center}
+.stat b{display:block;font-size:30px;line-height:1.1}
+.stat span{font-size:12px;color:var(--mut)}
+.bar{margin-top:12px}
+.bar input{width:100%;min-height:52px;border-radius:18px;border:1px solid var(--line);background:var(--card);color:var(--txt);padding:0 16px;font-size:16px}
+.bar input::placeholder{color:var(--mut)}
+main{max-width:1100px;margin:0 auto;padding:14px 16px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--pur2),var(--pnk));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;flex:none}
+.who{font-weight:800;font-size:18px}
+.fld{color:var(--mut);font-size:13px}
+.lbl{color:var(--pur);font-size:13px;font-weight:700;margin:6px 0}
+.biz{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:8px}
+.bn{font-weight:700}
+.bf{color:var(--mut);font-size:13px;margin-bottom:8px}
+.row{display:flex;gap:8px}
+.btn{flex:1;min-height:46px;border:0;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+.p{background:var(--pur);color:#1a1238}
+.s{background:transparent;color:var(--pur);box-shadow:inset 0 0 0 1.5px var(--line)}
 .empty{grid-column:1/-1;text-align:center;color:var(--mut);padding:30px}
-footer{max-width:1100px;margin:0 auto;padding:0 14px 30px;font-size:13px;color:var(--mut)}
+footer{max-width:1100px;margin:0 auto;padding:0 16px 30px;font-size:12px;color:var(--mut)}
+#gate .box{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px}
 </style>
 </head>
 <body>
 <header>
- <h1>חלוקת פרסום – סבב מוצ״ש</h1>
- <div class="sub">מצאי את השם שלך ואת מי את מפרסמת. לחיצה על שם פותחת וואטסאפ עם הודעה מוכנה לבקשת לוגו ודף פרסום.</div>
- <div class="bar" id="bar" hidden>
-  <input type="search" id="q" placeholder="חיפוש לפי שם" aria-label="חיפוש לפי שם">
- </div>
+ <h1>🌸 חלוקת פרסום – סבב מוצ״ש</h1>
+ <div class="hello">כוח נשי בעסקים · מצאי את השם שלך, הורידי את החומרים של שני העסקים ופרסמי בסטטוס</div>
+ <div class="stats" id="stats" hidden><div class="stat"><b style="color:var(--pnk)">19</b><span>בנות בסבב</span></div><div class="stat"><b style="color:var(--grn)">2</b><span>עסקים לפרסום לכל אחת</span></div><div class="stat"><b style="color:var(--yel)">מוצ״ש</b><span>מועד הפרסום</span></div></div>
+ <div class="bar" id="bar" hidden><input type="search" id="q" placeholder="🔍 חיפוש לפי שם" aria-label="חיפוש לפי שם"></div>
 </header>
 <div id="gate" style="max-width:420px;margin:40px auto;padding:0 18px">
- <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 1px 6px rgba(40,20,60,.1)">
+ <div class="box">
   <div style="font-weight:700;font-size:18px;margin-bottom:6px">הדף מוגן בסיסמה</div>
-  <div style="color:#6b6573;font-size:14px;margin-bottom:12px">הסיסמה נשלחה בקבוצת כוח נשי בעסקים. הקישור בתוקף עד יום ראשון 8.11.2026 בשעה 21:00.</div>
-  <input id="pw" type="password" placeholder="סיסמה" autocomplete="current-password" style="width:100%;min-height:48px;border:1px solid #cfc6d6;border-radius:12px;padding:0 14px;font-size:16px">
-  <button id="go" style="width:100%;min-height:48px;margin-top:10px;border:0;border-radius:12px;background:#128C4A;color:#fff;font-size:17px;font-weight:700;cursor:pointer">כניסה</button>
+  <div style="color:var(--mut);font-size:14px;margin-bottom:12px">הסיסמה נשלחה בקבוצת כוח נשי בעסקים. הקישור בתוקף עד יום ראשון 8.11.2026 בשעה 21:00.</div>
+  <input id="pw" type="password" placeholder="סיסמה" autocomplete="current-password" style="width:100%;min-height:48px;border:1px solid var(--line);background:var(--card2);color:var(--txt);border-radius:14px;padding:0 14px;font-size:16px">
+  <button id="go" style="width:100%;min-height:48px;margin-top:10px;border:0;border-radius:14px;background:var(--pur);color:#1a1238;font-size:17px;font-weight:700;cursor:pointer">כניסה</button>
   <div id="err" style="color:#b3261e;font-size:14px;margin-top:8px;min-height:18px"></div>
  </div>
 </div>
 <main id="list" hidden></main>
-<footer>עודכן ל-06.11.2026. סבב מוצ״ש, בין 19 הבנות שנרשמו.</footer>
+<footer>עודכן ל-06.11.2026 · הקבצים ללא פרטים אישיים: תמונות, סרטונים וקישור לוואטסאפ של העסק.</footer>
 <script>
-const ENC={"x": 1794164400000, "s": "aJNZqbva5DmoECoxUY6VvA==", "v": "/Jll9n9QG6nkgb4z", "c": "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", "i": 250000};
+const ENC={"x": 1794164400000, "s": "jDDj08oXYBGErSyj57KFLQ==", "v": "bRoC4wbiRV8zd3Rl", "c": "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", "i": 250000};
 let D=null,P=null;
-if(Date.now()>ENC.x){document.addEventListener('DOMContentLoaded',()=>{document.getElementById('gate').innerHTML='<div style="background:#fff;border-radius:16px;padding:22px;text-align:center"><div style="font-weight:700;font-size:18px">הקישור הזה כבר לא בתוקף</div><div style="color:#6b6573;margin-top:8px">בקשי קישור חדש מהמנהלות.</div></div>'})}
+if(Date.now()>ENC.x){document.addEventListener('DOMContentLoaded',()=>{document.getElementById('gate').innerHTML='<div style="background:#16152b;border-radius:16px;padding:22px;text-align:center;color:#f1effa"><div style="font-weight:700;font-size:18px">הקישור הזה כבר לא בתוקף</div><div style="color:#6b6573;margin-top:8px">בקשי קישור חדש מהמנהלות.</div></div>'})}
 let round="a";
-function phone(i){return P[i].p}
-function open_(i){
-  const n=P[i].n, u=P[i].u;
-  const m=(u?"היי 🌸 ":"היי "+n+" 🌸 ")+"אשמח לקבל את הלוגו ואת דף הפרסום של העסק שלך, כדי לפרסם אותו בסטטוס. תודה רבה!";
-  location.href="https://wa.me/"+phone(i)+"?text="+encodeURIComponent(m);
-}
-function btn(i){const b=document.createElement("button");b.className="btn";b.type="button";
-  b.innerHTML="<span></span><small>וואטסאפ ›</small>";b.firstChild.textContent=P[i].n+(P[i].f?" · "+P[i].f:"");
-  b.onclick=()=>open_(i);return b}
+function folder(i){return P[i].d?"https://drive.google.com/drive/folders/"+P[i].d:null}
+function wa(i){return "https://wa.me/"+P[i].p}
+function bizCard(i){
+  const d=document.createElement("div");d.className="biz";
+  const n=document.createElement("div");n.className="bn";n.textContent="📁 "+P[i].n;
+  const f=document.createElement("div");f.className="bf";f.textContent=P[i].f||"";
+  const r=document.createElement("div");r.className="row";
+  const a=document.createElement("button");a.type="button";a.className="btn p";a.textContent="⬇️ קבצים להורדה";
+  a.onclick=()=>{const u=folder(i); if(u) window.open(u,"_blank","noopener"); else window.open(wa(i)+"?text="+encodeURIComponent("היי "+P[i].n+" 🌸 אשמח לקבל את הלוגו ואת דף הפרסום של העסק שלך, כדי לפרסם אותו בסטטוס. תודה רבה!"),"_blank","noopener")};
+  const b=document.createElement("button");b.type="button";b.className="btn s";b.textContent="💬 לינק וואטסאפ";
+  b.onclick=()=>window.open(wa(i),"_blank","noopener");
+  r.append(a,b);d.append(n,f,r);return d}
 function render(){
-  for(const k of ["a","b"]){const x=document.getElementById("r"+k); if(x){const on=round===k; x.style.background=on?"#128C4A":"#fff"; x.style.color=on?"#fff":"#128C4A"; x.style.boxShadow="inset 0 0 0 2px #128C4A"}}
   const q=document.getElementById("q").value.trim();
   const el=document.getElementById("list"); el.innerHTML="";
   let n=0;
@@ -70,10 +81,14 @@ function render(){
     if(q && !P[w].n.includes(q)) continue;
     n++;
     const c=document.createElement("section");c.className="card";
+    const top=document.createElement("div");top.className="top";
+    const av=document.createElement("div");av.className="av";av.textContent=P[w].n.trim()[0];
+    const tx=document.createElement("div");
     const t=document.createElement("div");t.className="who";t.textContent=P[w].n;
     const f=document.createElement("div");f.className="fld";f.textContent=P[w].f||"";
-    const l=document.createElement("div");l.className="lbl";l.textContent="את מפרסמת:";
-    c.append(t,f,l,btn(a),btn(b));el.append(c);
+    tx.append(t,f);top.append(av,tx);
+    const l=document.createElement("div");l.className="lbl";l.textContent="🎯 את מפרסמת בסבב מוצ״ש:";
+    c.append(top,l,bizCard(a),bizCard(b));el.append(c);
   }
   if(!n){const e=document.createElement("div");e.className="empty";e.textContent="לא נמצאה בת בשם הזה";el.append(e)}
 }
@@ -86,7 +101,7 @@ async function unlock(pw){
   const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(ENC.s),iterations:ENC.i,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["decrypt"]);
   const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(ENC.v)},key,b64(ENC.c));
   D=JSON.parse(new TextDecoder().decode(pt)); P=D.people;
-  document.getElementById("gate").hidden=true; document.getElementById("bar").hidden=false; document.getElementById("list").hidden=false; render();
+  document.getElementById("gate").hidden=true; document.getElementById("bar").hidden=false; document.getElementById("stats").hidden=false; document.getElementById("list").hidden=false; render();
 }
 async function tryPw(pw,remember){
   try{ await unlock(pw); if(remember){try{localStorage.setItem("kn_pw",pw)}catch(e){}} return true }
