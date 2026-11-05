@@ -30,7 +30,7 @@ main{max-width:1100px;margin:0 auto;padding:14px 16px 20px;display:grid;grid-tem
 .bn{font-weight:700}
 .bf{color:var(--mut);font-size:13px;margin-bottom:8px}
 .row{display:flex;gap:8px}
-.btn{flex:1;min-height:46px;border:0;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;flex:1;min-height:46px;border:0;border-radius:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit}
 .p{background:var(--pur);color:#1a1238}
 .s{background:transparent;color:var(--pur);box-shadow:inset 0 0 0 1.5px var(--line)}
 .empty{grid-column:1/-1;text-align:center;color:var(--mut);padding:30px}
@@ -68,7 +68,7 @@ function bizCard(i){
   const n=document.createElement("div");n.className="bn";n.textContent="📁 "+P[i].n;
   const f=document.createElement("div");f.className="bf";f.textContent=P[i].f||"";
   const r=document.createElement("div");r.className="row";
-  const a=document.createElement("button");a.type="button";a.className="btn p";a.textContent="⬇️ קבצים להורדה";
+  const a=document.createElement("button");a.type="button";a.className="btn p";a.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1a1238" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M7.5 10 12 14.5 16.5 10"/><path d="M4 15.5v2.2A2.3 2.3 0 0 0 6.3 20h11.4a2.3 2.3 0 0 0 2.3-2.3v-2.2"/></svg><span>קבצים להורדה</span>';
   a.onclick=()=>{const u=folder(i); if(u) window.open(u,"_blank","noopener"); else window.open(wa(i)+"?text="+encodeURIComponent("היי "+P[i].n+" 🌸 אשמח לקבל את הלוגו ואת דף הפרסום של העסק שלך, כדי לפרסם אותו בסטטוס. תודה רבה!"),"_blank","noopener")};
   r.append(a);d.append(n,f,r);return d}
 function render(){
