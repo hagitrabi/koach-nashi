@@ -60,6 +60,7 @@ async function load(){
 $("go").onclick=async()=>{$("err").textContent="";try{await unlock($("pw").value.trim());AC=$("ac").value.trim();await load();$("gate").hidden=true;$("app").hidden=false}catch(e){$("err").textContent=e===401?"קוד מנהלת שגוי.":"הסיסמה או הקוד לא נכונים."}};
 ["pw","ac"].forEach(i=>$(i).addEventListener("keydown",e=>{if(e.key==="Enter")$("go").click()}));
 $("rf").onclick=()=>load();
+(async()=>{try{const s=JSON.parse(sessionStorage.getItem("kn_adm")||"null");if(!s)return;sessionStorage.removeItem("kn_adm");await unlock(s.pw);AC=s.ac;await load();$("gate").hidden=true;$("app").hidden=false}catch(e){}})();
 $("t1").onclick=()=>{$("v1").hidden=false;$("v2").hidden=true;$("t1").className="btn on";$("t2").className="btn s"};
 $("t2").onclick=()=>{$("v1").hidden=true;$("v2").hidden=false;$("t2").className="btn on";$("t1").className="btn s"};
 </script></body></html>
