@@ -137,7 +137,7 @@ async function openFiles(i){
   }catch(e){sub.textContent="לא הצלחנו לטעון. נסי לרענן את הדף ולהיכנס שוב."}
 }
 
-let ME=null,POSTED={};try{POSTED=JSON.parse(localStorage.getItem("kn_posted")||"{}")}catch(e){}
+let ME=null,VIEW=false,SRV={},POSTED={};try{POSTED=JSON.parse(localStorage.getItem("kn_posted")||"{}")}catch(e){}
 const first=n=>n.replace(/\(.*?\)/g,"").trim().split(/\s+/)[0];
 function greet(){const h=+new Intl.DateTimeFormat("en-GB",{hour:"numeric",hour12:false,timeZone:"Asia/Jerusalem"}).format(new Date())%24;
   return h>=5&&h<12?"בוקר טוב":h>=12&&h<18?"צהריים טובים":h>=18&&h<22?"ערב טוב":"לילה טוב"}
@@ -162,7 +162,8 @@ function bizCard(i,w){
   const a=document.createElement("button");a.type="button";a.className="btn p";a.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1a1238" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M7.5 10 12 14.5 16.5 10"/><path d="M4 15.5v2.2A2.3 2.3 0 0 0 6.3 20h11.4a2.3 2.3 0 0 0 2.3-2.3v-2.2"/></svg><span>קבצים להורדה</span>';
   a.onclick=()=>openFiles(i);
   r.append(a);
-  if(w!==undefined){const k=w+">"+i,pb=document.createElement("button");pb.type="button";pb.className="btn s";
+  if(w!==undefined&&VIEW){const on=!!SRV[P[w].n+">"+P[i].n],pb=document.createElement("button");pb.type="button";pb.disabled=true;pb.style.cursor="default";pb.className="btn "+(on?"done":"s");pb.textContent=on?"✓ פרסמה":"עוד לא פרסמה";r.append(pb)}
+  else if(w!==undefined){const k=w+">"+i,pb=document.createElement("button");pb.type="button";pb.className="btn s";
     const set=()=>{const on=!!POSTED[k];pb.className="btn "+(on?"done":"s");pb.textContent=on?"✓ פרסמתי":"פרסמתי"};set();
     pb.onclick=()=>{POSTED[k]=!POSTED[k];if(!POSTED[k])delete POSTED[k];try{localStorage.setItem("kn_posted",JSON.stringify(POSTED))}catch(e){}
       set();prog();report(w,i,!!POSTED[k]).then(loadBoard);if(POSTED[k])thanks("איזה כיף! תודה שפרסמת","בזכותך עוד בעלת עסק קיבלה חשיפה")};
@@ -188,7 +189,7 @@ function render(){
     const f=document.createElement("div");f.className="fld";f.textContent=P[w].f||"";
     tx.append(t,f);top.append(av,tx);
     const l=document.createElement("div");l.className="lbl";l.textContent="🎯 מפרסמת בסבב מוצ״ש:";
-    c.append(top,l,bizCard(a),bizCard(b));el.append(c);
+    c.append(top,l,bizCard(a,w),bizCard(b,w));el.append(c);
   }
   if(!n){const e=document.createElement("div");e.className="empty";e.textContent="לא נמצאה בת בשם הזה";el.append(e)}
 }
@@ -226,13 +227,14 @@ async function loadBoard(){
     const c=document.createElement("div");c.className="chips";
     rows.forEach(w=>{const n=board[P[w].n],x=document.createElement("span");x.className="chip "+(n>=2?"full":"half");x.textContent=(n>=2?"✓ ":"")+P[w].n+(n>=2?"":" ("+n+"/2)");c.append(x)});
     el.append(h,s,b,c);el.hidden=false;requestAnimationFrame(()=>i.style.width=Math.round(full/ids.length*100)+"%")}catch(e){}}
+async function loadSrv(){try{const a=JSON.parse(sessionStorage.getItem("kn_adm")||"null");if(!a)return;const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({pw:a.pw,admin:a.ac,action:"status"})});if(!r.ok)return;const {rows}=await r.json();SRV={};rows.forEach(x=>{if(x.done)SRV[x.who+">"+x.biz]=1});render()}catch(e){}}
 function enterView(){
-  ME=null;document.getElementById("gate").hidden=true;document.getElementById("list").hidden=false;
+  VIEW=true;ME=null;document.getElementById("gate").hidden=true;document.getElementById("list").hidden=false;
   const hi=document.getElementById("hi");hi.hidden=false;hi.innerHTML="";
   const row=document.createElement("div");row.className="hi";const h=document.createElement("h2");h.textContent="👀 תצוגת בנות (מנהלת)";
   const ob=document.createElement("button");ob.type="button";ob.className="out";ob.textContent="חזרה לניהול";ob.onclick=()=>{location.href="../mgr-b6de133f4f21/"};row.append(h,ob);hi.append(row);
   document.getElementById("hello").hidden=true;document.getElementById("bar").hidden=false;document.getElementById("stats").hidden=false;
-  document.getElementById("cnt").textContent=D.rounds[round].length;render();loadBoard()}
+  document.getElementById("cnt").textContent=D.rounds[round].length;render();loadBoard();loadSrv()}
 function logout(){try{localStorage.removeItem("kn_pw");localStorage.removeItem("kn_who")}catch(e){}location.reload()}
 function resolveName(txt){
   const q=norm(txt);if(!q)return[];
