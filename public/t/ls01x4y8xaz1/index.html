@@ -232,7 +232,7 @@ function enterView(){
   const row=document.createElement("div");row.className="hi";const h=document.createElement("h2");h.textContent="👀 תצוגת בנות (מנהלת)";
   const ob=document.createElement("button");ob.type="button";ob.className="out";ob.textContent="חזרה לניהול";ob.onclick=()=>{location.href="../mgr-b6de133f4f21/"};row.append(h,ob);hi.append(row);
   document.getElementById("hello").hidden=true;document.getElementById("bar").hidden=false;document.getElementById("stats").hidden=false;
-  document.getElementById("cnt").textContent=D.rounds[round].length;render()}
+  document.getElementById("cnt").textContent=D.rounds[round].length;render();loadBoard()}
 function logout(){try{localStorage.removeItem("kn_pw");localStorage.removeItem("kn_who")}catch(e){}location.reload()}
 function resolveName(txt){
   const q=norm(txt);if(!q)return[];
