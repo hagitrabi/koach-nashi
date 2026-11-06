@@ -47,22 +47,40 @@ footer{max-width:1100px;margin:0 auto;padding:0 16px 30px;font-size:12px;color:v
 #ov .it img,#ov .it video{width:100%;height:180px;object-fit:cover;display:block;background:#000}
 #ov .it a{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;background:var(--pur);color:#1a1238;font-weight:800;text-decoration:none}
 #ov .it a svg{width:20px;height:20px}
+
+.btn.done{background:var(--grn);color:#052e1f;box-shadow:none}
+.hi{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 8px}
+.hi h2{margin:0;font-size:22px}
+.out{min-height:44px;padding:0 16px;border:0;border-radius:12px;background:var(--card2);color:var(--mut);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.prog{margin:12px 0 4px}.prog .t{font-size:14px;color:var(--mut);margin-bottom:6px}
+.prog .b{height:10px;border-radius:99px;background:var(--card2);overflow:hidden}.prog .b i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pur2),var(--pnk));transition:width .4s}
+#ov .wa{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:8px 10px;margin-bottom:14px}
+#ov .wa span{flex:1;font-size:13px;direction:ltr;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ov .wa button{min-height:40px;padding:0 14px;border:0;border-radius:10px;background:var(--pur);color:#1a1238;font-weight:800;cursor:pointer;font-family:inherit}
+#pop{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;background:rgba(8,6,18,.6);padding:20px}
+#pop .bx{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px 22px;max-width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:pp .35s ease}
+#pop .em{font-size:44px}#pop h4{margin:8px 0 6px;font-size:21px}#pop p{margin:0;color:var(--mut);font-size:15px}
+@keyframes pp{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+#cf{position:fixed;inset:0;pointer-events:none;z-index:80}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
 <header>
  <h1><span>כוח נשי בעסקים</span><span>חלוקת פרסום – סבב מוצ״ש</span></h1>
- <div class="hello">מצאי את השם שלך, הורידי את החומרים של שני העסקים ופרסמי בסטטוס</div>
+ <div class="hello" id="hello">הורידי את החומרים של שני העסקים ופרסמי בסטטוס</div>
+ <div id="hi" hidden></div>
  <div class="stats" id="stats" hidden><div class="stat"><b style="color:var(--pnk)">19</b><span>בנות בסבב</span></div><div class="stat"><b style="color:var(--grn)">2</b><span>עסקים לפרסום לכל אחת</span></div><div class="stat"><b style="color:var(--yel)">מוצ״ש</b><span>מועד הפרסום</span></div></div>
  <div class="bar" id="bar" hidden><input type="search" id="q" placeholder="🔍 חיפוש לפי שם" aria-label="חיפוש לפי שם"></div>
 </header>
 <div id="gate" style="max-width:420px;margin:40px auto;padding:0 18px">
  <div class="box">
-  <div style="font-weight:700;font-size:18px;margin-bottom:6px">הדף מוגן בסיסמה</div>
-  <div style="color:var(--mut);font-size:14px;margin-bottom:12px">הסיסמה נשלחה בקבוצת כוח נשי בעסקים. הקישור בתוקף עד יום ראשון 8.11.2026 בשעה 21:00.</div>
+  <div style="font-weight:700;font-size:18px;margin-bottom:6px">כניסה לאזור האישי</div>
+  <div style="color:var(--mut);font-size:14px;margin-bottom:12px">כתבי את שמך ואת הסיסמה שנשלחה בקבוצת כוח נשי בעסקים. הקישור בתוקף עד יום ראשון 8.11.2026 בשעה 21:00.</div>
+  <input id="nm" type="text" placeholder="השם שלך (כמו בקבוצה)" autocomplete="name" style="width:100%;min-height:48px;border:1px solid var(--line);background:var(--card2);color:var(--txt);border-radius:14px;padding:0 14px;font-size:16px;margin-bottom:10px">
   <input id="pw" type="password" placeholder="סיסמה" autocomplete="current-password" style="width:100%;min-height:48px;border:1px solid var(--line);background:var(--card2);color:var(--txt);border-radius:14px;padding:0 14px;font-size:16px">
   <button id="go" style="width:100%;min-height:48px;margin-top:10px;border:0;border-radius:14px;background:var(--pur);color:#1a1238;font-size:17px;font-weight:700;cursor:pointer">כניסה</button>
-  <div id="err" style="color:#b3261e;font-size:14px;margin-top:8px;min-height:18px"></div>
+  <div id="pick" style="display:grid;gap:8px;margin-top:8px"></div><div id="err" style="color:#b3261e;font-size:14px;margin-top:8px;min-height:18px"></div>
  </div>
 </div>
 <main id="list" hidden></main>
@@ -83,7 +101,12 @@ document.addEventListener("DOMContentLoaded",()=>{document.getElementById("ovx")
 async function openFiles(i){
   const p=P[i],ov=document.getElementById("ov"),g=document.getElementById("ovg");
   document.getElementById("ovt").textContent=p.n;
-  const sub=document.getElementById("ovs");sub.textContent="טוען את החומרים...";g.innerHTML="";ov.style.display="block";document.body.style.overflow="hidden";
+  const sub=document.getElementById("ovs");sub.textContent="טוען את החומרים...";g.innerHTML="";
+  const old=document.getElementById("wa");if(old)old.remove();
+  if(p.p){const link="https://wa.me/"+p.p,wa=document.createElement("div");wa.className="wa";wa.id="wa";
+    const sp=document.createElement("span");sp.textContent="💬 "+link;const cb=document.createElement("button");cb.type="button";cb.textContent="העתקה";cb.onclick=()=>copyTxt(link,cb);
+    wa.append(sp,cb);sub.after(wa)}
+  let shown=false;ov.style.display="block";document.body.style.overflow="hidden";
   try{
     const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({pw:PW,id:p.d})});
     if(!r.ok) throw new Error(r.status);
@@ -95,21 +118,50 @@ async function openFiles(i){
       let m;
       if(f.type==="video"){m=document.createElement("video");m.controls=true;m.preload="metadata";m.playsInline=true;m.src=f.view}
       else{m=document.createElement("img");m.alt="";m.loading="lazy";m.src=f.view}
-      const a=document.createElement("a");a.href=f.dl;a.innerHTML=ARR+"<span>הורדה</span>";
+      const a=document.createElement("a");a.href=f.dl;a.innerHTML=ARR+"<span>הורדה</span>";a.addEventListener("click",()=>{if(!shown){shown=true;setTimeout(()=>thanks("בזכותך עוד בעלת עסק מקבלת חשיפה","תודה שאת חלק מהקבוצה"),500)}});
       it.append(m,a);g.append(it)}
   }catch(e){sub.textContent="לא הצלחנו לטעון. נסי לרענן את הדף ולהיכנס שוב."}
 }
-function bizCard(i){
+
+let ME=null,POSTED={};try{POSTED=JSON.parse(localStorage.getItem("kn_posted")||"{}")}catch(e){}
+const first=n=>n.replace(/\(.*?\)/g,"").trim().split(/\s+/)[0];
+function greet(){const h=+new Intl.DateTimeFormat("en-GB",{hour:"numeric",hour12:false,timeZone:"Asia/Jerusalem"}).format(new Date())%24;
+  return h>=5&&h<12?"בוקר טוב":h>=12&&h<18?"צהריים טובים":h>=18&&h<22?"ערב טוב":"לילה טוב"}
+function prog(){const el=document.getElementById("prg");if(!el||ME===null)return;const row=D.rounds[round].find(x=>x[0]===ME);
+  const n=[row[1],row[2]].filter(i=>POSTED[ME+">"+i]).length;el.querySelector(".t").textContent="פרסמת "+n+" מתוך 2";el.querySelector("i").style.width=(n*50)+"%"}
+function report(w,i,done){try{fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({pw:PW,action:"posted",who:P[w].n,biz:P[i].n,done})}).catch(()=>{})}catch(e){}}
+function thanks(t,s){document.getElementById("pt").textContent=t;document.getElementById("ps").textContent=s;const p=document.getElementById("pop");p.style.display="flex";confetti();clearTimeout(thanks.t);thanks.t=setTimeout(()=>p.style.display="none",4200);p.onclick=()=>p.style.display="none"}
+function confetti(){const c=document.getElementById("cf"),x=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;
+  const col=["#ff8fc3","#e0449a","#ffd3e8","#fbbf24","#34d399","#ffffff"];
+  const ps=Array.from({length:140},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.4,w:6+Math.random()*7,h:8+Math.random()*10,vx:-2+Math.random()*4,vy:3+Math.random()*4,r:Math.random()*6,vr:-.2+Math.random()*.4,c:col[Math.random()*col.length|0]}));
+  const t0=performance.now();(function f(t){x.clearRect(0,0,c.width,c.height);const k=(t-t0)/3200;
+    ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.05;p.r+=p.vr;x.save();x.globalAlpha=Math.max(0,1-k*.9);x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.w/2,-p.h/2,p.w,p.h);x.restore()});
+    if(k<1)requestAnimationFrame(f);else x.clearRect(0,0,c.width,c.height)})(t0)}
+function copyTxt(t,btn){const done=()=>{const o=btn.textContent;btn.textContent="הועתק ✓";setTimeout(()=>btn.textContent=o,1600)};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,()=>fb())}else fb();
+  function fb(){const a=document.createElement("textarea");a.value=t;document.body.append(a);a.select();try{document.execCommand("copy")}catch(e){}a.remove();done()}}
+function bizCard(i,w){
   const d=document.createElement("div");d.className="biz";
   const n=document.createElement("div");n.className="bn";n.textContent="📁 "+P[i].n;
   const f=document.createElement("div");f.className="bf";f.textContent=P[i].f||"";
   const r=document.createElement("div");r.className="row";
   const a=document.createElement("button");a.type="button";a.className="btn p";a.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1a1238" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M7.5 10 12 14.5 16.5 10"/><path d="M4 15.5v2.2A2.3 2.3 0 0 0 6.3 20h11.4a2.3 2.3 0 0 0 2.3-2.3v-2.2"/></svg><span>קבצים להורדה</span>';
   a.onclick=()=>openFiles(i);
-  r.append(a);d.append(n,f,r);return d}
+  r.append(a);
+  if(w!==undefined){const k=w+">"+i,pb=document.createElement("button");pb.type="button";pb.className="btn s";
+    const set=()=>{const on=!!POSTED[k];pb.className="btn "+(on?"done":"s");pb.textContent=on?"✓ פרסמתי":"פרסמתי"};set();
+    pb.onclick=()=>{POSTED[k]=!POSTED[k];if(!POSTED[k])delete POSTED[k];try{localStorage.setItem("kn_posted",JSON.stringify(POSTED))}catch(e){}
+      set();prog();report(w,i,!!POSTED[k]);if(POSTED[k])thanks("איזה כיף! תודה שפרסמת","בזכותך עוד בעלת עסק קיבלה חשיפה")};
+    r.append(pb)}
+  d.append(n,f,r);return d}
 function render(){
-  const q=document.getElementById("q").value.trim();
   const el=document.getElementById("list"); el.innerHTML="";
+  if(ME!==null){
+    const row=D.rounds[round].find(x=>x[0]===ME); if(!row) return;
+    const c=document.createElement("section");c.className="card";
+    const l=document.createElement("div");l.className="lbl";l.textContent="🎯 היום את מפרסמת את שני העסקים האלה:";
+    c.append(l,bizCard(row[1],ME),bizCard(row[2],ME));el.append(c);prog();return}
+  const q=document.getElementById("q").value.trim();
   let n=0;
   for(const [w,a,b] of D.rounds[round]){
     if(q && !P[w].n.includes(q)) continue;
@@ -121,7 +173,7 @@ function render(){
     const t=document.createElement("div");t.className="who";t.textContent=P[w].n;
     const f=document.createElement("div");f.className="fld";f.textContent=P[w].f||"";
     tx.append(t,f);top.append(av,tx);
-    const l=document.createElement("div");l.className="lbl";l.textContent="🎯 את מפרסמת בסבב מוצ״ש:";
+    const l=document.createElement("div");l.className="lbl";l.textContent="🎯 מפרסמת בסבב מוצ״ש:";
     c.append(top,l,bizCard(a),bizCard(b));el.append(c);
   }
   if(!n){const e=document.createElement("div");e.className="empty";e.textContent="לא נמצאה בת בשם הזה";el.append(e)}
@@ -135,20 +187,48 @@ async function unlock(pw){
   const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(ENC.s),iterations:ENC.i,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["decrypt"]);
   const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(ENC.v)},key,b64(ENC.c));
   D=JSON.parse(new TextDecoder().decode(pt)); P=D.people; PW=pw;
-  document.getElementById("gate").hidden=true; document.getElementById("bar").hidden=false; document.getElementById("stats").hidden=false; document.getElementById("list").hidden=false; render();
+  
 }
+
+const norm=t=>t.replace(/[()"׳״'\-]/g," ").replace(/\s+/g," ").trim();
+function enter(w){
+  ME=w;try{localStorage.setItem("kn_who",String(w))}catch(e){}
+  document.getElementById("gate").hidden=true;document.getElementById("list").hidden=false;
+  const hi=document.getElementById("hi");hi.hidden=false;hi.innerHTML="";
+  const row=document.createElement("div");row.className="hi";
+  const h=document.createElement("h2");h.textContent=w===-1?greet()+", מנהלת":greet()+", "+first(P[w].n)+" 🌸";
+  const ob=document.createElement("button");ob.type="button";ob.className="out";ob.textContent="יציאה";ob.onclick=logout;row.append(h,ob);hi.append(row);
+  document.getElementById("hello").hidden=true;
+  if(w===-1){ME=null;document.getElementById("bar").hidden=false;document.getElementById("stats").hidden=false}
+  else{const pg=document.createElement("div");pg.className="prog";pg.id="prg";pg.innerHTML='<div class="t"></div><div class="b"><i></i></div>';hi.append(pg)}
+  render();if(ME!==null)prog()}
+function logout(){try{localStorage.removeItem("kn_pw");localStorage.removeItem("kn_who")}catch(e){}location.reload()}
+function resolveName(txt){
+  const q=norm(txt);if(!q)return[];if(q==="מנהלת")return[-1];
+  const ids=D.rounds[round].map(r=>r[0]);
+  const ex=ids.filter(w=>norm(P[w].n)===q);if(ex.length===1)return ex;
+  return ids.filter(w=>norm(P[w].n).includes(q))}
 async function tryPw(pw,remember){
   try{ await unlock(pw); if(remember){try{localStorage.setItem("kn_pw",pw)}catch(e){}} return true }
   catch(e){ return false }
 }
 document.getElementById("go").onclick=async()=>{
-  const e=document.getElementById("err"); e.textContent="";
+  const e=document.getElementById("err"),pk=document.getElementById("pick"); e.textContent="";pk.innerHTML="";
   const ok=await tryPw(document.getElementById("pw").value.trim(),true);
-  if(!ok) e.textContent="הסיסמה לא נכונה. נסי שוב.";
+  if(!ok){e.textContent="הסיסמה לא נכונה. נסי שוב.";return}
+  const m=resolveName(document.getElementById("nm").value);
+  if(m.length===1){enter(m[0]);return}
+  try{localStorage.removeItem("kn_pw")}catch(x){}
+  if(!m.length){e.textContent="לא מצאנו את השם הזה. כתבי את השם כמו שהוא מופיע בקבוצה.";return}
+  e.textContent="יש כמה שמות דומים. בחרי את השם שלך:";
+  m.forEach(w=>{const b=document.createElement("button");b.type="button";b.textContent=P[w].n;b.style.cssText="min-height:48px;border:0;border-radius:14px;background:var(--card2);color:var(--txt);font-size:16px;font-weight:700;cursor:pointer;font-family:inherit";
+    b.onclick=()=>{try{localStorage.setItem("kn_pw",document.getElementById("pw").value.trim())}catch(x){}enter(w)};pk.append(b)})
 };
+document.getElementById("nm").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("pw").focus()});
 document.getElementById("pw").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("go").click()});
-(async()=>{try{const s=localStorage.getItem("kn_pw"); if(s) await tryPw(s,false)}catch(e){}})();
+(async()=>{try{const s=localStorage.getItem("kn_pw"),w=localStorage.getItem("kn_who"); if(s&&w!==null&&await tryPw(s,false)) enter(+w)}catch(e){}})();
 </script>
 <div id="ov" role="dialog" aria-modal="true"><div class="pn"><button class="x" id="ovx" type="button" aria-label="סגירה">✕</button><h3 id="ovt"></h3><div class="sub" id="ovs"></div><div class="g" id="ovg"></div></div></div>
+<div id="pop"><div class="bx"><div class="em">💗</div><h4 id="pt"></h4><p id="ps"></p></div></div><canvas id="cf"></canvas>
 </body>
 </html>
