@@ -24,6 +24,8 @@ input:focus,textarea:focus{outline:0;border-color:var(--pur);box-shadow:0 0 0 3p
 <body><div class="w">
 <h1><span>כוח נשי בעסקים</span><span>הרשמה לפרסום הדדי</span></h1>
 <div class="sub">ממלאות פעם אחת, ונכנסות אוטומטית לסבב הפרסום הקרוב. שדות עם כוכבית חובה.</div>
+<div id="cut" style="background:rgba(255,255,255,.08);border-radius:14px;padding:12px 14px;margin:0 0 14px;font-size:15px;line-height:1.6;text-align:center"></div>
+<script>(function(){var n=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Jerusalem"}));var d=n.getFullYear()+"-"+(n.getMonth()+1)+"-"+n.getDate();var el=document.getElementById("cut");el.textContent=(d==="2026-11-6"&&n.getHours()<12)?"⏰ אפשר למלא את הטופס עד השעה 12:00 היום כדי להיכנס לסבב מוצ״ש. מי שתמלא אחרי זה – תיכנס לסבב הבא.":"ההרשמה פתוחה. בנות שנרשמות עכשיו נכנסות לסבב הפרסום הבא."})()</script>
 <form class="box" id="f" novalidate>
 <label>שם מלא <i>*</i></label><input type="text" id="full_name" autocomplete="name" required>
 <label>שם העסק <i>*</i></label><input type="text" id="business" required>
