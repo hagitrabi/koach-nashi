@@ -196,7 +196,16 @@ function render(){
     const row=D.rounds[round].find(x=>x[0]===ME); if(!row) return;
     const c=document.createElement("section");c.className="card";
     const l=document.createElement("div");l.className="lbl";l.textContent="🎯 היום את מפרסמת את שני העסקים האלה:";
-    c.append(l,bizCard(row[1],ME),bizCard(row[2],ME));el.append(c);prog();return}
+    c.style.gridColumn="1/-1";
+    const mb=document.createElement("button");mb.type="button";mb.className="btn s";mb.style.cssText="width:100%;margin:2px 0 10px";mb.textContent="👀 מי מפרסם אותי השבוע?";
+    const mp=document.createElement("div");mp.hidden=true;mp.style.cssText="background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:0 0 12px;text-align:center";
+    const who=D.rounds[round].filter(x=>x[1]===ME||x[2]===ME).map(x=>P[x[0]]);
+    mp.innerHTML="<div style='color:var(--mut);font-size:13px;margin-bottom:8px'>השבוע מפרסמות אותך:</div>";
+    who.forEach(pp=>{const d=document.createElement("div");d.style.cssText="font-weight:800;font-size:16px;margin:4px 0";d.textContent="🌸 "+pp.n;const f=document.createElement("div");f.style.cssText="color:var(--mut);font-size:13px";f.textContent=pp.f||"";mp.append(d,f)});
+    if(!who.length){const d=document.createElement("div");d.textContent="עוד לא שובצו בנות שמפרסמות אותך";mp.append(d)}
+    mb.onclick=()=>{mp.hidden=!mp.hidden};
+    c.append(l,bizCard(row[1],ME),bizCard(row[2],ME),mb,mp);el.append(c);prog();
+    const sep=document.createElement("div");sep.style.cssText="grid-column:1/-1;text-align:center;font-weight:800;font-size:17px;margin:10px 0 0";sep.textContent="כל הבנות בסבב – חפשי את השם שלך 🔍";el.append(sep)}
   const q=document.getElementById("q").value.trim();
   let n=0;
   for(const [w,a,b] of D.rounds[round]){
@@ -210,7 +219,7 @@ function render(){
     const f=document.createElement("div");f.className="fld";f.textContent=P[w].f||"";
     tx.append(t,f);top.append(av,tx);
     const l=document.createElement("div");l.className="lbl";l.textContent="🎯 מפרסמת בסבב מוצ״ש:";
-    c.append(top,l,bizCard(a,w),bizCard(b,w));el.append(c);
+    c.append(top,l,bizCard(a,VIEW?w:undefined),bizCard(b,VIEW?w:undefined));el.append(c);
   }
   if(!n){const e=document.createElement("div");e.className="empty";e.textContent="לא נמצאה בת בשם הזה";el.append(e)}
 }
@@ -236,7 +245,7 @@ function enter(w){
   const ob=document.createElement("button");ob.type="button";ob.className="out";ob.textContent="יציאה";ob.onclick=logout;row.append(h,ob);hi.append(row);
   document.getElementById("hello").hidden=true;
   const pg=document.createElement("div");pg.className="prog";pg.id="prg";pg.innerHTML='<div class="t"></div><div class="b"><i></i></div>';hi.append(pg);
-  render();prog();loadBoard()}
+  document.getElementById("bar").hidden=false;document.getElementById("stats").hidden=false;render();prog();loadBoard()}
 async function loadBoard(){
   try{const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({pw:PW,action:"board"})});if(!r.ok)return;
     const {board}=await r.json(),ids=D.rounds[round].map(x=>x[0]),el=document.getElementById("board");
