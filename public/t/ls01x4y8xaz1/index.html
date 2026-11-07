@@ -201,13 +201,13 @@ function render(){
     const l=document.createElement("div");l.className="lbl";l.id="ml";l.textContent="🎯 היום את מפרסמת את שני העסקים האלה:";
     c.style.gridColumn="1/-1";
     const mb=document.createElement("button");mb.type="button";mb.className="btn p";mb.style.cssText="width:100%;margin:4px 0 12px;min-height:48px;font-size:16px;font-weight:800";mb.textContent="👀 מי מפרסם אותי השבוע?";
-    const mp=document.createElement("div");mp.hidden=true;mp.style.cssText="background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:0 0 12px;text-align:center";
+    const mp=document.createElement("div");mp.id="mp";mp.hidden=true;mp.style.cssText="background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:0 0 12px;text-align:center";
     const who=D.rounds[round].filter(x=>x[1]===ME||x[2]===ME).map(x=>P[x[0]]);
     mp.innerHTML="<div style='color:var(--mut);font-size:13px;margin-bottom:8px'>השבוע מפרסמות אותך:</div>";
     who.forEach(pp=>{const d=document.createElement("div");d.style.cssText="font-weight:800;font-size:16px;margin:4px 0";d.textContent="🌸 "+pp.n;const f=document.createElement("div");f.style.cssText="color:var(--mut);font-size:13px";f.textContent=pp.f||"";mp.append(d,f)});
     if(!who.length){const d=document.createElement("div");d.textContent="עוד לא שובצו בנות שמפרסמות אותך";mp.append(d)}
-    mb.onclick=()=>{mp.hidden=!mp.hidden};
-    c.append(l,mb,mp,bizCard(row[1],ME),bizCard(row[2],ME));el.append(c);prog();
+    
+    c.append(l,mp,bizCard(row[1],ME),bizCard(row[2],ME));el.append(c);prog();
     const sep=document.createElement("div");sep.style.cssText="grid-column:1/-1;text-align:center;font-weight:800;font-size:17px;margin:10px 0 0";sep.textContent="כל הבנות בסבב – חפשי את השם שלך 🔍";el.append(sep)}
   const q=document.getElementById("q").value.trim();
   let n=0;
@@ -245,7 +245,7 @@ function enter(w){
   const hi=document.getElementById("hi");hi.hidden=false;hi.innerHTML="";
   const row=document.createElement("div");row.className="hi";
   const h=document.createElement("h2");h.textContent=greet()+", "+first(P[w].n)+" 🌸";
-  const ob=document.createElement("button");ob.type="button";ob.className="out";ob.textContent="יציאה";ob.onclick=logout;row.append(h,ob);hi.append(row);
+  const ob=document.createElement("button");ob.type="button";ob.className="out";ob.textContent="יציאה";ob.onclick=logout;const wb=document.createElement("button");wb.type="button";wb.className="out";wb.id="wb";wb.textContent="👀 מי מפרסם אותי?";wb.onclick=()=>{const m=document.getElementById("mp");if(m){m.hidden=!m.hidden;if(!m.hidden)m.scrollIntoView({behavior:"smooth",block:"center"})}};const bw=document.createElement("div");bw.style.cssText="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-start";bw.append(wb,ob);row.append(h,bw);hi.append(row);
   document.getElementById("hello").hidden=true;
   const pg=document.createElement("div");pg.className="prog";pg.id="prg";pg.innerHTML='<div class="t"></div><div class="b"><i></i></div>';hi.append(pg);
   document.getElementById("bar").hidden=false;document.getElementById("stats").hidden=false;render();prog();loadBoard()}
