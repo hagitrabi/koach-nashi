@@ -66,10 +66,12 @@ $("f").onsubmit=async e=>{e.preventDefault();const err=$("err");err.textContent=
     const body={action:"register",website:v("website"),full_name:v("full_name"),business:v("business"),field:v("field"),city:v("city"),phone:v("phone"),email:v("email"),sentence:v("sentence"),wa_link:v("wa_link"),consent:true,
       files:files.map(x=>({name:x.f.name,type:x.f.type,size:x.f.size,kind:x.kind}))};
     const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
+    if(r.status===409){try{localStorage.setItem("kn_reg","1")}catch(e){}$("f").hidden=true;$("ok").hidden=false;$("ok").querySelector("h2").textContent="כבר נרשמת 💗";$("ok").querySelector("p").textContent="המספר הזה כבר רשום אצלנו, ואין צורך להירשם שוב. את בסבב הפרסום.";return}
     if(!r.ok)throw new Error("reg");const j=await r.json();
     for(const u of (j.uploads||[])){b.textContent="מעלה קבצים "+(u.idx+1)+"/"+files.length+"...";const fd=new FormData();fd.append("cacheControl","3600");fd.append("",files[u.idx].f);
       const up=await fetch(u.url,{method:"PUT",body:fd});if(!up.ok)throw new Error("up")}
-    $("f").hidden=true;$("ok").hidden=false;scrollTo({top:0,behavior:"smooth"});
+    try{localStorage.setItem("kn_reg","1")}catch(e){}$("f").hidden=true;$("ok").hidden=false;scrollTo({top:0,behavior:"smooth"});
   }catch(x){err.textContent="משהו השתבש בשליחה. נסי שוב, ואם זה חוזר, כתבי למנהלות.";b.disabled=false;b.textContent="שליחת הרשמה"}
 };
+try{if(localStorage.getItem("kn_reg")){$("f").hidden=true;$("ok").hidden=false;$("ok").querySelector("h2").textContent="כבר נרשמת 💗";$("ok").querySelector("p").textContent="ההרשמה שלך כבר התקבלה, ואין צורך להירשם שוב. את בסבב הפרסום."}}catch(e){}
 </script></body></html>

@@ -28,7 +28,7 @@ th,td{padding:10px 10px;text-align:right;border-bottom:1px solid var(--line);fon
 <input id="pw" type="password" placeholder="סיסמת הדף"><input id="ac" type="password" placeholder="קוד מנהלת"><button class="btn" id="go" style="width:100%">כניסה</button><div id="err" style="color:var(--red);margin-top:8px;min-height:18px;font-size:14px"></div></div>
 <div id="app" hidden>
 <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h1>ניהול סבב מוצ״ש</h1><div class="mut" id="upd"></div></div><div style="display:flex;gap:8px"><button class="btn s" id="vw">👀 תצוגת בנות</button><button class="btn s" id="rf">רענון</button></div></div>
-<div class="stats"><div class="stat"><b id="n1" style="color:var(--grn)">0</b><span>פרסומים אושרו</span></div><div class="stat"><b id="n2" style="color:var(--yel)">0</b><span>ממתינים</span></div><div class="stat"><b id="n3" style="color:var(--pnk)">0</b><span>בנות שסיימו</span></div></div>
+<div class="stats"><div class="stat"><b id="n1" style="color:var(--grn)">0</b><span>בנות שפרסמו</span></div><div class="stat"><b id="n2" style="color:var(--yel)">0</b><span>בנות שלא פרסמו</span></div><div class="stat"><b id="n3" style="color:var(--pnk)">0</b><span>בנות בסבב</span></div></div>
 <div class="tabs"><button class="btn on" id="t1">מי פרסמה</button><button class="btn s" id="t2">הרשמות חדשות <span id="rc"></span></button></div>
 <div id="v1"><div class="tw"><table><thead><tr><th>שם</th><th>עסק 1</th><th>עסק 2</th><th>תזכורת</th></tr></thead><tbody id="tb"></tbody></table></div></div>
 <div id="v2" hidden></div>
@@ -53,11 +53,17 @@ async function load(){
     [a,b].forEach((i,j)=>{const t=document.createElement("td");t.innerHTML='<div></div><span class="st '+(ds[j]?"ok":"wt")+'">'+(ds[j]?"✓ פורסם":"ממתין")+"</span>";t.firstChild.textContent=P[i].n;tr.append(t)});
     const tw=document.createElement("td");if(k<2&&PH[P[w].n]){const x=document.createElement("a");x.className="btn wa";x.target="_blank";x.rel="noopener";x.textContent="שלחי תזכורת";
       x.href="https://wa.me/"+PH[P[w].n]+"?text="+encodeURIComponent(msg(PH[P[w].n],P[w].n,k?"עסק אחד":"שני העסקים"));tw.append(x)}else tw.textContent=k===2?"✓":"";tr.append(tw);tb.append(tr)});
-  $("n1").textContent=ok;$("n2").textContent=wait;$("n3").textContent=fin;$("upd").textContent="עודכן "+new Date().toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"});
-  try{const {rows:rg}=await call({action:"regs",admin:AC});$("rc").textContent=rg.length?"("+rg.length+")":"";const v=$("v2");v.innerHTML="";
+  $("n1").textContent=fin;$("n2").textContent=P.length-fin;$("n3").textContent=P.length;$("upd").textContent="עודכן "+new Date().toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"});
+  try{const {rows:rg}=await call({action:"regs",admin:AC});const v=$("v2");v.innerHTML="";
     if(!rg.length)v.innerHTML='<div class="mut" style="padding:20px;text-align:center">אין הרשמות חדשות עדיין.</div>';
-    rg.forEach(r=>{const d=document.createElement("div");d.className="rg";const t=(a,b)=>{const e=document.createElement("div");e.className="mut";e.textContent=a+": "+b;return e};
-      const n=document.createElement("b");n.textContent=r.full_name+" · "+r.business;d.append(n,t("תחום",r.field),t("עיר",r.city),t("וואטסאפ",r.phone),t("אימייל",r.email),t("משפט",r.sentence||""),t("אישור תנאים",r.consent?"✓ אישרה":"לא"),t("נרשמה",new Date(r.created_at).toLocaleString("he-IL")));v.append(d)})}catch(e){}
+    const lev=(x,y)=>{const m=[...Array(y.length+1)].map((_,j)=>j);for(let i=1;i<=x.length;i++){let p=m[0];m[0]=i;for(let j=1;j<=y.length;j++){const t=m[j];m[j]=Math.min(m[j]+1,m[j-1]+1,p+(x[i-1]===y[j-1]?0:1));p=t}}return m[y.length]};
+    const nn=x=>(x||"").replace(/\(.*?\)/g,"").replace(/\s+/g," ").trim();const inRound=r=>P.some(p=>lev(nn(p.n),nn(r.full_name))<=2);
+    const seen={};const info=rg.map(r=>{const ph=(r.phone||"").replace(/\D/g,"").slice(-9),k=ph||nn(r.full_name);const test=/בדיק/.test(r.full_name+r.business);const dup=!!seen[k];seen[k]=1;return {r,st:test?"test":dup?"dup":inRound(r)?"in":"new"}});
+    const order={new:0,in:1,dup:2,test:3};info.sort((x,y)=>order[x.st]-order[y.st]);
+    const nw=info.filter(x=>x.st==="new").length;$("rc").textContent=nw?"("+nw+" חדשות)":"";
+    info.forEach(({r,st})=>{const d=document.createElement("div");d.className="rg";if(st!=="new")d.style.opacity=".55";const t=(a,b)=>{const e=document.createElement("div");e.className="mut";e.textContent=a+": "+b;return e};
+      const tag=document.createElement("span");tag.className="st "+(st==="new"?"wt":st==="in"?"ok":"late");tag.style.cssText="float:left;margin-inline-start:8px";tag.textContent={new:"🆕 עוד לא שובצה",in:"✓ כבר בסבב",dup:"✖ כפולה – אפשר להתעלם",test:"✖ בדיקה – למחוק"}[st];
+      const n=document.createElement("b");n.textContent=r.full_name+" · "+r.business;d.append(tag,n,t("תחום",r.field),t("עיר",r.city),t("וואטסאפ",r.phone),t("אימייל",r.email),t("משפט",r.sentence||""),t("אישור תנאים",r.consent?"✓ אישרה":"לא"),t("נרשמה",new Date(r.created_at).toLocaleString("he-IL")));v.append(d)})}catch(e){}
 }
 $("go").onclick=async()=>{$("err").textContent="";try{await unlock($("pw").value.trim());AC=$("ac").value.trim();await load();$("gate").hidden=true;$("app").hidden=false}catch(e){$("err").textContent=e===401?"קוד מנהלת שגוי.":"הסיסמה או הקוד לא נכונים."}};
 ["pw","ac"].forEach(i=>$(i).addEventListener("keydown",e=>{if(e.key==="Enter")$("go").click()}));
