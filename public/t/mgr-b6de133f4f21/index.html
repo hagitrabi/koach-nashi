@@ -55,13 +55,15 @@ async function load(){
       x.href="https://wa.me/"+PH[P[w].n]+"?text="+encodeURIComponent(msg(PH[P[w].n],P[w].n,k?"עסק אחד":"שני העסקים"));tw.append(x)}else tw.textContent=k===2?"✓":"";tr.append(tw);tb.append(tr)});
   $("n1").textContent=fin;$("n2").textContent=P.length-fin;$("n3").textContent=P.length;$("upd").textContent="עודכן "+new Date().toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"});
   try{const {rows:rg}=await call({action:"regs",admin:AC});const v=$("v2");v.innerHTML="";
-    if(!rg.length)v.innerHTML='<div class="mut" style="padding:20px;text-align:center">אין הרשמות חדשות עדיין.</div>';
+    
     const lev=(x,y)=>{const m=[...Array(y.length+1)].map((_,j)=>j);for(let i=1;i<=x.length;i++){let p=m[0];m[0]=i;for(let j=1;j<=y.length;j++){const t=m[j];m[j]=Math.min(m[j]+1,m[j-1]+1,p+(x[i-1]===y[j-1]?0:1));p=t}}return m[y.length]};
     const nn=x=>(x||"").replace(/\(.*?\)/g,"").replace(/\s+/g," ").trim();const inRound=r=>P.some(p=>lev(nn(p.n),nn(r.full_name))<=2);
     const seen={};const info=rg.map(r=>{const ph=(r.phone||"").replace(/\D/g,"").slice(-9),k=ph||nn(r.full_name);const test=/בדיק/.test(r.full_name+r.business);const dup=!!seen[k];seen[k]=1;return {r,st:test?"test":dup?"dup":inRound(r)?"in":"new"}});
     const order={new:0,in:1,dup:2,test:3};info.sort((x,y)=>order[x.st]-order[y.st]);
     const nw=info.filter(x=>x.st==="new").length;$("rc").textContent=nw?"("+nw+" חדשות)":"";
-    info.forEach(({r,st})=>{const d=document.createElement("div");d.className="rg";if(st!=="new")d.style.opacity=".55";const t=(a,b)=>{const e=document.createElement("div");e.className="mut";e.textContent=a+": "+b;return e};
+    const showAll=!!window.SHOWALL;const tg=document.createElement("button");tg.type="button";tg.className="btn s";tg.style.cssText="margin:0 0 10px;width:100%";tg.textContent=showAll?"הצגת חדשות בלבד":"הצגת גם מי שכבר בסבב ("+(info.length-nw)+")";tg.onclick=()=>{window.SHOWALL=!window.SHOWALL;load()};if(info.length>nw)v.append(tg);
+    if(!nw&&!showAll){const e=document.createElement("div");e.className="mut";e.style.cssText="padding:20px;text-align:center";e.textContent="אין הרשמות חדשות. כל הנרשמות כבר בסבב.";v.append(e)}
+    info.filter(x=>showAll||x.st==="new").forEach(({r,st})=>{const d=document.createElement("div");d.className="rg";if(st!=="new")d.style.opacity=".55";const t=(a,b)=>{const e=document.createElement("div");e.className="mut";e.textContent=a+": "+b;return e};
       const tag=document.createElement("span");tag.className="st "+(st==="new"?"wt":st==="in"?"ok":"late");tag.style.cssText="float:left;margin-inline-start:8px";tag.textContent={new:"🆕 עוד לא שובצה",in:"✓ כבר בסבב",dup:"✖ כפולה – אפשר להתעלם",test:"✖ בדיקה – למחוק"}[st];
       const n=document.createElement("b");n.textContent=r.full_name+" · "+r.business;d.append(tag,n,t("תחום",r.field),t("עיר",r.city),t("וואטסאפ",r.phone),t("אימייל",r.email),t("משפט",r.sentence||""),t("אישור תנאים",r.consent?"✓ אישרה":"לא"),t("נרשמה",new Date(r.created_at).toLocaleString("he-IL")));v.append(d)})}catch(e){}
 }
