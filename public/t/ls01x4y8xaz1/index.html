@@ -163,10 +163,10 @@ const first=n=>n.replace(/\(.*?\)/g,"").trim().split(/\s+/)[0];
 function greet(){const h=+new Intl.DateTimeFormat("en-GB",{hour:"numeric",hour12:false,timeZone:"Asia/Jerusalem"}).format(new Date())%24;
   return h>=5&&h<12?"בוקר טוב":h>=12&&h<18?"צהריים טובים":h>=18&&h<22?"ערב טוב":"לילה טוב"}
 function prog(){const el=document.getElementById("prg");if(!el||ME===null)return;const row=D.rounds[round].find(x=>x[0]===ME);
-  const n=[row[1],row[2]].filter(i=>POSTED[ME+">"+i]).length;el.querySelector(".t").textContent="פרסמת "+n+" מתוך 2";el.querySelector("i").style.width=(n*50)+"%";
+  const T=row.slice(1),tot=T.length,n=T.filter(i=>POSTED[ME+">"+i]).length;el.querySelector(".t").textContent="פרסמת "+n+" מתוך "+tot;el.querySelector("i").style.width=(n*100/tot)+"%";
   let dn=document.getElementById("dn");if(!dn){dn=document.createElement("div");dn.id="dn";el.after(dn)}
-  dn.className=n===2?"dn on":"dn";dn.innerHTML=n===2?"<b>✓</b><div><strong>כל הכבוד! פרסמת את שני העסקים 🌸</strong><span>תודה שאת חלק מהקבוצה. אפשר לעקוב בצד מי כבר פרסמה.</span></div>":"";
-  const ml=document.getElementById("ml");if(ml)ml.textContent=n===2?"✓ כבר פרסמת את שני העסקים האלה:":"🎯 היום את מפרסמת את שני העסקים האלה:"}
+  dn.className=n===tot?"dn on":"dn";dn.innerHTML=n===tot?"<b>✓</b><div><strong>כל הכבוד! פרסמת את כל העסקים 🌸</strong><span>תודה שאת חלק מהקבוצה. אפשר לעקוב בצד מי כבר פרסמה.</span></div>":"";
+  const ml=document.getElementById("ml");if(ml)ml.textContent=n===tot?"✓ כבר פרסמת את העסקים האלה:":"🎯 היום את מפרסמת את העסקים האלה:"}
 function report(w,i,done){try{return fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({pw:PW,action:"posted",who:P[w].n,biz:P[i].n,done})}).catch(()=>{})}catch(e){return Promise.resolve()}}
 function thanks(t,s){document.getElementById("pt").textContent=t;document.getElementById("ps").textContent=s;const p=document.getElementById("pop");p.style.display="flex";confetti();clearTimeout(thanks.t);thanks.t=setTimeout(()=>p.style.display="none",4200);p.onclick=()=>p.style.display="none"}
 function confetti(){const c=document.getElementById("cf"),x=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;
@@ -202,20 +202,20 @@ function render(){
   if(ME!==null){
     const row=D.rounds[round].find(x=>x[0]===ME); if(!row) return;
     const c=document.createElement("section");c.className="card";
-    const l=document.createElement("div");l.className="lbl";l.id="ml";l.textContent="🎯 היום את מפרסמת את שני העסקים האלה:";
+    const l=document.createElement("div");l.className="lbl";l.id="ml";l.textContent="🎯 היום את מפרסמת את העסקים האלה:";
     c.style.gridColumn="1/-1";
     const mb=document.createElement("button");mb.type="button";mb.className="btn p";mb.style.cssText="width:100%;margin:4px 0 12px;min-height:48px;font-size:16px;font-weight:800";mb.textContent="👀 מי מפרסם אותי השבוע?";
     const mp=document.createElement("div");mp.id="mp";mp.hidden=true;mp.style.cssText="background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:0 0 12px;text-align:center";
-    const who=D.rounds[round].filter(x=>x[1]===ME||x[2]===ME).map(x=>P[x[0]]);
+    const who=D.rounds[round].filter(x=>x.slice(1).includes(ME)).map(x=>P[x[0]]);
     mp.innerHTML="<div style='color:var(--mut);font-size:13px;margin-bottom:8px'>השבוע מפרסמות אותך:</div>";
     who.forEach(pp=>{const d=document.createElement("div");d.style.cssText="font-weight:800;font-size:16px;margin:4px 0";d.textContent="🌸 "+pp.n;const f=document.createElement("div");f.style.cssText="color:var(--mut);font-size:13px";f.textContent=pp.f||"";mp.append(d,f)});
     if(!who.length){const d=document.createElement("div");d.textContent="עוד לא שובצו בנות שמפרסמות אותך";mp.append(d)}
     
-    c.append(l,mp,bizCard(row[1],ME),bizCard(row[2],ME));el.append(c);prog();
+    c.append(l,mp,...row.slice(1).map(j=>bizCard(j,ME)));el.append(c);prog();
     const sep=document.createElement("div");sep.style.cssText="grid-column:1/-1;text-align:center;font-weight:800;font-size:17px;margin:10px 0 0";sep.textContent="כל הבנות בסבב – חפשי את השם שלך 🔍";el.append(sep)}
   const q=document.getElementById("q").value.trim();
   let n=0;
-  for(const [w,a,b] of D.rounds[round]){
+  for(const [w,...BZ] of D.rounds[round]){
     if(q && !P[w].n.includes(q)) continue;
     n++;
     const c=document.createElement("section");c.className="card";
@@ -226,7 +226,7 @@ function render(){
     const f=document.createElement("div");f.className="fld";f.textContent=P[w].f||"";
     tx.append(t,f);top.append(av,tx);
     const l=document.createElement("div");l.className="lbl";l.textContent="🎯 מפרסמת בסבב מוצ״ש:";
-    c.append(top,l,bizCard(a,VIEW?w:undefined),bizCard(b,VIEW?w:undefined));el.append(c);
+    c.append(top,l,...BZ.map(j=>bizCard(j,VIEW?w:undefined)));el.append(c);
   }
   if(!n){const e=document.createElement("div");e.className="empty";e.textContent="לא נמצאה בת בשם הזה";el.append(e)}
 }
@@ -240,6 +240,31 @@ async function unlock(pw){
   const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(ENC.v)},key,b64(ENC.c));
   D=JSON.parse(new TextDecoder().decode(pt)); P=D.people; PW=pw;
   
+}
+
+
+async function mergeLate(){
+  try{
+    const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({pw:PW,action:"late"})});
+    if(!r.ok)return;const {rows}=await r.json();if(!rows)return;
+    const R=D.rounds[round],N=s=>String(s||"").replace(/[()"׳״'\-]/g," ").replace(/\s+/g," ").trim();
+    const W=s=>N(s).split(" ").filter(t=>t.length>=4);
+    const clash=(a,b)=>{const x=W(P[a].f);return W(P[b].f).some(t=>x.includes(t))};
+    for(const x of rows){
+      if(P.some(p=>p.d===x.key))continue;
+      const nn=N(x.name);if(!nn)continue;
+      if(P.some(p=>{const q=N(p.n);return q===nn||(nn.length>=4&&q.length>=4&&(q.includes(nn)||nn.includes(q)))}))continue;
+      const i=P.length;P.push({n:String(x.name).trim(),f:String(x.biz||x.field||"").trim(),d:x.key});
+      const adv=j=>R.filter(r=>r.slice(1).includes(j)).length;
+      const ids=R.map(r=>r[0]);
+      const byAdv=ids.slice().sort((a,b)=>adv(a)-adv(b)||a-b);
+      let mine=byAdv.filter(j=>!clash(i,j)).slice(0,2);if(mine.length<2)mine=byAdv.slice(0,2);
+      const byLoad=R.slice().sort((a,b)=>a.length-b.length||a[0]-b[0]).map(r=>r[0]);
+      let pubs=byLoad.filter(j=>!clash(i,j)&&!mine.includes(j)).slice(0,2);if(pubs.length<2)pubs=byLoad.filter(j=>!mine.includes(j)).slice(0,2);
+      R.push([i,...mine]);
+      pubs.forEach(j=>R.find(r=>r[0]===j).push(i));
+    }
+  }catch(e){}
 }
 
 const norm=t=>t.replace(/[()"׳״'\-]/g," ").replace(/\s+/g," ").trim();
@@ -258,7 +283,7 @@ async function loadBoard(){
     const {board}=await r.json(),ids=D.rounds[round].map(x=>x[0]),el=document.getElementById("board");
     const cnt=w=>board[P[w].n]||0;
     const rows=ids.slice().sort((a,b)=>cnt(b)-cnt(a)||P[a].n.localeCompare(P[b].n,"he"));
-    const full=rows.filter(w=>cnt(w)>=2).length;
+    const need=w=>D.rounds[round].find(x=>x[0]===w).length-1,full=rows.filter(w=>cnt(w)>=need(w)).length;
     el.innerHTML="";const h=document.createElement("h3");h.textContent="💪 מי כבר פרסמה";
     const s=document.createElement("div");s.className="sm";s.textContent=full+" מתוך "+ids.length+" בנות כבר סיימו";
     const b=document.createElement("div");b.className="b";const i=document.createElement("i");b.append(i);
@@ -268,7 +293,7 @@ async function loadBoard(){
       const rk=document.createElement("span");rk.className="rk";rk.textContent=k+1;
       const av=document.createElement("span");av.className="lav";av.textContent=P[w].n.trim()[0];
       const nm=document.createElement("span");nm.className="ln";nm.textContent=P[w].n;
-      const bd=document.createElement("span");bd.className="bd"+(n>=2?" f":"");bd.textContent=n>=2?"✓":(n===1?"1/2":"");
+      const bd=document.createElement("span");bd.className="bd"+(n>=need(w)?" f":"");bd.textContent=n>=need(w)?"✓":(n>0?n+"/"+need(w):"");
       row.append(rk,av,nm,bd);l.append(row)});
     el.append(h,s,b,th,l);const cl=()=>document.body.classList.remove('dr');const bx=document.createElement("button");bx.id="bx";bx.type="button";bx.textContent="✕ סגירה";bx.style.cssText="display:none;margin:0 0 8px;background:var(--card2);color:var(--txt,#fff);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font:700 15px inherit;min-height:44px";bx.onclick=cl;el.prepend(bx);el.hidden=false;if(!document.getElementById("bt")){const bt=document.createElement("button");bt.id="bt";bt.type="button";bt.textContent="💪 מי כבר פרסמה";const bk=document.createElement("div");bk.id="bk";const op=()=>document.body.classList.add("dr"),cl=()=>document.body.classList.remove("dr");bt.onclick=op;bk.onclick=cl;document.body.append(bt,bk)}if(el.parentNode!==document.body){document.body.insertBefore(el,document.querySelector('footer'))}document.body.classList.add('side');requestAnimationFrame(()=>i.style.width=Math.round(full/ids.length*100)+"%")}catch(e){}}
 function enterView(){
@@ -285,7 +310,7 @@ function resolveName(txt){
   const ex=ids.filter(w=>norm(P[w].n)===q);if(ex.length===1)return ex;
   return ids.filter(w=>norm(P[w].n).includes(q))}
 async function tryPw(pw,remember){
-  try{ await unlock(pw); if(remember){try{localStorage.setItem("kn_pw",pw)}catch(e){}} return true }
+  try{ await unlock(pw);await mergeLate(); if(remember){try{localStorage.setItem("kn_pw",pw)}catch(e){}} return true }
   catch(e){ return false }
 }
 document.getElementById("go").onclick=async()=>{

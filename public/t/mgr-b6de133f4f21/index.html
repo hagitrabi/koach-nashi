@@ -30,7 +30,7 @@ th,td{padding:10px 10px;text-align:right;border-bottom:1px solid var(--line);fon
 <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h1>ניהול סבב מוצ״ש</h1><div class="mut" id="upd"></div></div><div style="display:flex;gap:8px"><button class="btn s" id="vw">👀 תצוגת בנות</button><button class="btn s" id="rf">רענון</button></div></div>
 <div class="stats"><div class="stat"><b id="n1" style="color:var(--grn)">0</b><span>בנות שפרסמו</span></div><div class="stat"><b id="n2" style="color:var(--yel)">0</b><span>בנות שלא פרסמו</span></div><div class="stat"><b id="n3" style="color:var(--pnk)">0</b><span>בנות בסבב</span></div></div>
 <div class="tabs"><button class="btn on" id="t1">מי פרסמה</button><button class="btn s" id="t2">הרשמות חדשות <span id="rc"></span></button><button class="btn s" id="t3">חומרים וקבצים</button></div>
-<div id="v1"><div class="tw"><table><thead><tr><th>שם</th><th>עסק 1</th><th>עסק 2</th><th>תזכורת</th></tr></thead><tbody id="tb"></tbody></table></div></div>
+<div id="v1"><div class="tw"><table><thead><tr><th>שם</th><th>עסק 1</th><th>עסק 2</th><th>עסק 3</th><th>תזכורת</th></tr></thead><tbody id="tb"></tbody></table></div></div>
 <div id="v2" hidden></div>
 <div id="v3" hidden></div>
 </div></div>
@@ -41,19 +41,44 @@ let D,P,PW="",AC="",ROWS=[],PH={};
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 async function unlock(pw){if(Date.now()>ENC.x)throw 0;const km=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveKey"]);
  const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(ENC.s),iterations:ENC.i,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["decrypt"]);
- D=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(ENC.v)},key,b64(ENC.c))));P=D.people;PW=pw}
+ D=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(ENC.v)},key,b64(ENC.c))));P=D.people;PW=pw;await mergeLate()}
+
+async function mergeLate(){
+  try{
+    const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({pw:PW,action:"late"})});
+    if(!r.ok)return;const {rows}=await r.json();if(!rows)return;
+    const R=D.rounds[round],N=s=>String(s||"").replace(/[()"׳״'\-]/g," ").replace(/\s+/g," ").trim();
+    const W=s=>N(s).split(" ").filter(t=>t.length>=4);
+    const clash=(a,b)=>{const x=W(P[a].f);return W(P[b].f).some(t=>x.includes(t))};
+    for(const x of rows){
+      if(P.some(p=>p.d===x.key))continue;
+      const nn=N(x.name);if(!nn)continue;
+      if(P.some(p=>{const q=N(p.n);return q===nn||(nn.length>=4&&q.length>=4&&(q.includes(nn)||nn.includes(q)))}))continue;
+      const i=P.length;P.push({n:String(x.name).trim(),f:String(x.biz||x.field||"").trim(),d:x.key});
+      const adv=j=>R.filter(r=>r.slice(1).includes(j)).length;
+      const ids=R.map(r=>r[0]);
+      const byAdv=ids.slice().sort((a,b)=>adv(a)-adv(b)||a-b);
+      let mine=byAdv.filter(j=>!clash(i,j)).slice(0,2);if(mine.length<2)mine=byAdv.slice(0,2);
+      const byLoad=R.slice().sort((a,b)=>a.length-b.length||a[0]-b[0]).map(r=>r[0]);
+      let pubs=byLoad.filter(j=>!clash(i,j)&&!mine.includes(j)).slice(0,2);if(pubs.length<2)pubs=byLoad.filter(j=>!mine.includes(j)).slice(0,2);
+      R.push([i,...mine]);
+      pubs.forEach(j=>R.find(r=>r[0]===j).push(i));
+    }
+  }catch(e){}
+}
 const $=id=>document.getElementById(id);
+let round='a';
 async function call(o){const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(o)});if(!r.ok)throw r.status;return r.json()}
 const msg=(p,n,kind)=>"היי "+n.replace(/\(.*?\)/g,"").trim().split(/\s+/)[0]+" 🌸 תזכורת קטנה, עוד לא אישרת פרסום של "+kind+" בסבב מוצ״ש. את מפרסמת כאן: "+location.origin+"/koach-nashi/t/ls01x4y8xaz1/ . תודה רבה!";
 async function load(){
   const {rows}=await call({action:"status",admin:AC});ROWS=rows;try{const {rows:cs}=await call({action:"contacts",admin:AC});PH={};cs.forEach(c=>PH[c.name]=c.phone)}catch(e){}const done={};rows.forEach(r=>{if(r.done)done[r.who+">"+r.biz]=1});
   let ok=0,wait=0,fin=0;const tb=$("tb");tb.innerHTML="";
-  D.rounds.a.forEach(([w,a,b])=>{const tr=document.createElement("tr"),ds=[a,b].map(i=>!!done[P[w].n+">"+P[i].n]),k=ds.filter(Boolean).length;ok+=k;wait+=2-k;if(k===2)fin++;
+  D.rounds.a.forEach(([w,...Z])=>{const tr=document.createElement("tr"),ds=Z.map(i=>!!done[P[w].n+">"+P[i].n]),k=ds.filter(Boolean).length;ok+=k;wait+=Z.length-k;if(k===Z.length)fin++;
     const c=[P[w].n,...[a,b].map((i,j)=>null)];
     const td0=document.createElement("td");td0.innerHTML="<b></b><div class=mut></div>";td0.firstChild.textContent=P[w].n;td0.lastChild.textContent=P[w].f||"";tr.append(td0);
-    [a,b].forEach((i,j)=>{const t=document.createElement("td");t.innerHTML='<div></div><span class="st '+(ds[j]?"ok":"wt")+'">'+(ds[j]?"✓ פורסם":"ממתין")+"</span>";t.firstChild.textContent=P[i].n;tr.append(t)});
-    const tw=document.createElement("td");if(k<2&&PH[P[w].n]){const x=document.createElement("a");x.className="btn wa";x.target="_blank";x.rel="noopener";x.textContent="שלחי תזכורת";
-      x.href="https://wa.me/"+PH[P[w].n]+"?text="+encodeURIComponent(msg(PH[P[w].n],P[w].n,k?"עסק אחד":"שני העסקים"));tw.append(x)}else tw.textContent=k===2?"✓":"";tr.append(tw);tb.append(tr)});
+    Z.forEach((i,j)=>{const t=document.createElement("td");t.innerHTML='<div></div><span class="st '+(ds[j]?"ok":"wt")+'">'+(ds[j]?"✓ פורסם":"ממתין")+"</span>";t.firstChild.textContent=P[i].n;tr.append(t)});
+    const tw=document.createElement("td");if(k<Z.length&&PH[P[w].n]){const x=document.createElement("a");x.className="btn wa";x.target="_blank";x.rel="noopener";x.textContent="שלחי תזכורת";
+      x.href="https://wa.me/"+PH[P[w].n]+"?text="+encodeURIComponent(msg(PH[P[w].n],P[w].n,k?"חלק מהעסקים":"העסקים"));tw.append(x)}else tw.textContent=k===Z.length?"✓":"";tr.append(tw);tb.append(tr)});
   $("n1").textContent=fin;$("n2").textContent=P.length-fin;$("n3").textContent=P.length;$("upd").textContent="עודכן "+new Date().toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"});
   try{const {rows:rg}=await call({action:"regs",admin:AC});const v=$("v2");v.innerHTML="";
     
