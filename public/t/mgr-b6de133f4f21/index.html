@@ -30,7 +30,7 @@ th,td{padding:10px 10px;text-align:right;border-bottom:1px solid var(--line);fon
 <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h1>ניהול סבב מוצ״ש</h1><div class="mut" id="upd"></div></div><div style="display:flex;gap:8px"><button class="btn s" id="vw">👀 תצוגת בנות</button><button class="btn s" id="rf">רענון</button></div></div>
 <div class="stats"><div class="stat"><b id="n1" style="color:var(--grn)">0</b><span>בנות שפרסמו</span></div><div class="stat"><b id="n2" style="color:var(--yel)">0</b><span>בנות שלא פרסמו</span></div><div class="stat"><b id="n3" style="color:var(--pnk)">0</b><span>בנות בסבב</span></div></div>
 <div class="tabs"><button class="btn on" id="t1">מי פרסמה</button><button class="btn s" id="t2">הרשמות חדשות <span id="rc"></span></button><button class="btn s" id="t3">חומרים וקבצים</button></div>
-<div id="v1"><div class="tw"><table><thead><tr><th>שם</th><th>עסק 1</th><th>עסק 2</th><th>עסק 3</th><th>תזכורת</th></tr></thead><tbody id="tb"></tbody></table></div></div>
+<div id="v1"><div id="flt" style="display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px"><button type="button" class="btn on" data-f="all">הכל</button><button type="button" class="btn s" data-f="0">לא פרסמו</button><button type="button" class="btn s" data-f="part">פרסמו חלק</button><button type="button" class="btn s" data-f="done">סיימו</button><button type="button" class="btn wa" id="nx" style="margin-inline-start:auto">שלחי תזכורת לבאה בתור ◀</button></div><div class="tw"><table><thead><tr><th>שם</th><th>עסק 1</th><th>עסק 2</th><th>עסק 3</th><th>תזכורת</th></tr></thead><tbody id="tb"></tbody></table></div></div>
 <div id="v2" hidden></div>
 <div id="v3" hidden></div>
 </div></div>
@@ -73,13 +73,13 @@ const msg=(p,n,kind)=>"היי "+n.replace(/\(.*?\)/g,"").trim().split(/\s+/)[0]+
 async function load(){
   const {rows}=await call({action:"status",admin:AC});ROWS=rows;try{const {rows:cs}=await call({action:"contacts",admin:AC});PH={};cs.forEach(c=>PH[c.name]=c.phone)}catch(e){}const done={};rows.forEach(r=>{if(r.done)done[r.who+">"+r.biz]=1});
   let ok=0,wait=0,fin=0;const tb=$("tb");tb.innerHTML="";
-  D.rounds.a.forEach(([w,...Z])=>{const tr=document.createElement("tr"),ds=Z.map(i=>!!done[P[w].n+">"+P[i].n]),k=ds.filter(Boolean).length;ok+=k;wait+=Z.length-k;if(k===Z.length)fin++;
+  D.rounds.a.forEach(([w,...Z])=>{const tr=document.createElement("tr"),ds=Z.map(i=>!!done[P[w].n+">"+P[i].n]),k=ds.filter(Boolean).length;tr.dataset.s=k===Z.length?"done":k?"part":"0";ok+=k;wait+=Z.length-k;if(k===Z.length)fin++;
     const c=[P[w].n,...[a,b].map((i,j)=>null)];
     const td0=document.createElement("td");td0.innerHTML="<b></b><div class=mut></div>";td0.firstChild.textContent=P[w].n;td0.lastChild.textContent=P[w].f||"";tr.append(td0);
     Z.forEach((i,j)=>{const t=document.createElement("td");t.innerHTML='<div></div><span class="st '+(ds[j]?"ok":"wt")+'">'+(ds[j]?"✓ פורסם":"ממתין")+"</span>";t.firstChild.textContent=P[i].n;tr.append(t)});
     const tw=document.createElement("td");if(k<Z.length&&PH[P[w].n]){const x=document.createElement("a");x.className="btn wa";x.target="_blank";x.rel="noopener";x.textContent="שלחי תזכורת";
       x.href="https://wa.me/"+PH[P[w].n]+"?text="+encodeURIComponent(msg(PH[P[w].n],P[w].n,k?"חלק מהעסקים":"העסקים"));tw.append(x)}else tw.textContent=k===Z.length?"✓":"";tr.append(tw);tb.append(tr)});
-  $("n1").textContent=fin;$("n2").textContent=P.length-fin;$("n3").textContent=P.length;$("upd").textContent="עודכן "+new Date().toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"});
+  applyF();$("n1").textContent=fin;$("n2").textContent=P.length-fin;$("n3").textContent=P.length;$("upd").textContent="עודכן "+new Date().toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"});
   try{const {rows:rg}=await call({action:"regs",admin:AC});const v=$("v2");v.innerHTML="";
     
     const lev=(x,y)=>{const m=[...Array(y.length+1)].map((_,j)=>j);for(let i=1;i<=x.length;i++){let p=m[0];m[0]=i;for(let j=1;j<=y.length;j++){const t=m[j];m[j]=Math.min(m[j]+1,m[j-1]+1,p+(x[i-1]===y[j-1]?0:1));p=t}}return m[y.length]};
@@ -96,6 +96,10 @@ async function load(){
 $("go").onclick=async()=>{$("err").textContent="";try{await unlock($("pw").value.trim());AC=$("ac").value.trim();await load();if($("rm").checked){try{localStorage.setItem("kn_mgr",JSON.stringify({pw:PW,ac:AC}))}catch(x){}}$("gate").hidden=true;$("app").hidden=false}catch(e){$("err").textContent=e===401?"קוד מנהלת שגוי.":"הסיסמה או הקוד לא נכונים."}};
 ["pw","ac"].forEach(i=>$(i).addEventListener("keydown",e=>{if(e.key==="Enter")$("go").click()}));
 $("rf").onclick=()=>load();
+window.FLT="all";
+function applyF(){document.querySelectorAll("#tb tr").forEach(r=>{r.hidden=!(FLT==="all"||r.dataset.s===FLT)});document.querySelectorAll("#flt [data-f]").forEach(b=>b.className=b.dataset.f===FLT?"btn on":"btn s")}
+document.querySelectorAll("#flt [data-f]").forEach(b=>b.onclick=()=>{FLT=b.dataset.f;applyF()});
+$("nx").onclick=()=>{const a=[...document.querySelectorAll("#tb tr:not([hidden]) a.wa")].find(x=>!x.dataset.sent);if(!a){$("nx").textContent="אין עוד תזכורות ברשימה ✓";return}a.dataset.sent=1;a.textContent="נשלחה ✓";a.style.opacity=".6";window.open(a.href,"_blank")}
 {const lo=document.createElement("button");lo.type="button";lo.className="btn s";lo.textContent="יציאה";lo.onclick=()=>{try{localStorage.removeItem("kn_mgr")}catch(x){}location.reload()};$("rf").after(lo)}
 $("vw").onclick=()=>{sessionStorage.setItem("kn_view",JSON.stringify({pw:PW}));location.href="../ls01x4y8xaz1/"};
 (async()=>{try{let s=JSON.parse(sessionStorage.getItem("kn_adm")||"null");if(!s){try{s=JSON.parse(localStorage.getItem("kn_mgr")||"null")}catch(x){}if(!s)return}else sessionStorage.removeItem("kn_adm");await unlock(s.pw);AC=s.ac;await load();$("gate").hidden=true;$("app").hidden=false}catch(e){}})();
