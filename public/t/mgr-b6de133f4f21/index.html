@@ -74,7 +74,6 @@ async function load(){
   const {rows}=await call({action:"status",admin:AC});ROWS=rows;try{const {rows:cs}=await call({action:"contacts",admin:AC});PH={};cs.forEach(c=>PH[c.name]=c.phone)}catch(e){}const done={};rows.forEach(r=>{if(r.done)done[r.who+">"+r.biz]=1});
   let ok=0,wait=0,fin=0;const tb=$("tb");tb.innerHTML="";
   D.rounds.a.forEach(([w,...Z])=>{const tr=document.createElement("tr"),ds=Z.map(i=>!!done[P[w].n+">"+P[i].n]),k=ds.filter(Boolean).length;tr.dataset.s=k===Z.length?"done":k?"part":"0";ok+=k;wait+=Z.length-k;if(k===Z.length)fin++;
-    const c=[P[w].n,...[a,b].map((i,j)=>null)];
     const td0=document.createElement("td");td0.innerHTML="<b></b><div class=mut></div>";td0.firstChild.textContent=P[w].n;td0.lastChild.textContent=P[w].f||"";tr.append(td0);
     Z.forEach((i,j)=>{const t=document.createElement("td");t.innerHTML='<div></div><span class="st '+(ds[j]?"ok":"wt")+'">'+(ds[j]?"✓ פורסם":"ממתין")+"</span>";t.firstChild.textContent=P[i].n;tr.append(t)});
     const tw=document.createElement("td");if(k<Z.length&&PH[P[w].n]){const x=document.createElement("a");x.className="btn wa";x.target="_blank";x.rel="noopener";x.textContent="שלחי תזכורת";
