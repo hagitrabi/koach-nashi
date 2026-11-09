@@ -68,8 +68,8 @@ async function mergeLate(){
           if(!k)continue;
           got.push(r[k]);chosen.push([r,k]);used.add(j)}
         if(chosen.length>=2)break}
-      if(chosen.length<2){chosen.forEach(([r,k])=>{});P.pop();continue}
-      R.push([i,...got]);
+      if(got.length<2){const ex=j=>R.filter(r=>r.slice(1).includes(j)).length;const pool=ids.filter(j=>!got.includes(j)).sort((a,b)=>ex(a)-ex(b)||a-b);for(const j of pool){if(got.length>=2)break;if(!clash(i,j)||pool.length<3)got.push(j)}while(got.length<2&&pool.length)got.push(pool.shift())}
+      R.push([i,...got.slice(0,2)]);
       chosen.forEach(([r,k])=>{r[k]=i});
     }
   }catch(e){}
