@@ -47,6 +47,7 @@ async function mergeLate(){
   try{
     const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({pw:PW,action:"late"})});
     if(!r.ok)return;const {rows}=await r.json();if(!rows)return;
+    let BRD={};try{const rb=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({pw:PW,action:"board"})});if(rb.ok)BRD=(await rb.json()).board||{}}catch(e){}
     const R=D.rounds[round],N=s=>String(s||"").replace(/[()"׳״'\-]/g," ").replace(/\s+/g," ").trim();
     const W=s=>N(s).split(" ").filter(t=>t.length>=4);
     const clash=(a,b)=>{const x=W(P[a].f);return W(P[b].f).some(t=>x.includes(t))};
@@ -56,7 +57,7 @@ async function mergeLate(){
       if(P.some(p=>{const q=N(p.n);return q===nn||(nn.length>=4&&q.length>=4&&(q.includes(nn)||nn.includes(q)))}))continue;
       const i=P.length;P.push({n:String(x.name).trim(),f:String(x.biz||x.field||"").trim(),d:x.key});
       const ids=R.map(r=>r[0]);const used=new Set();
-      let S=true;const free=j=>{const r=R.find(q=>q[0]===j);return r&&r.length===3&&!used.has(j)&&(!S||!clash(i,j))};
+      let S=true;const free=j=>{const r=R.find(q=>q[0]===j);return r&&r.length===3&&!used.has(j)&&!(BRD[P[j].n]>0)&&(!S||!clash(i,j))};
       let chosen=[],got=[];
       for(S of [true,false]){chosen=[];got=[];used.clear();
         for(const j of ids.slice().sort((a,b)=>a-b)){
