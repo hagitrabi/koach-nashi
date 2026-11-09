@@ -30,7 +30,7 @@ th,td{padding:10px 10px;text-align:right;border-bottom:1px solid var(--line);fon
 <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h1>ניהול סבב מוצ״ש</h1><div class="mut" id="upd"></div></div><div style="display:flex;gap:8px"><button class="btn s" id="vw">👀 תצוגת בנות</button><button class="btn s" id="rf">רענון</button></div></div>
 <div class="stats"><div class="stat"><b id="n1" style="color:var(--grn)">0</b><span>בנות שפרסמו</span></div><div class="stat"><b id="n2" style="color:var(--yel)">0</b><span>בנות שלא פרסמו</span></div><div class="stat"><b id="n3" style="color:var(--pnk)">0</b><span>בנות בסבב</span></div></div>
 <div class="tabs"><button class="btn on" id="t1">מי פרסמה</button><button class="btn s" id="t2">הרשמות חדשות <span id="rc"></span></button><button class="btn s" id="t3">חומרים וקבצים</button></div>
-<div id="v1"><div id="flt" style="display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px"><button type="button" class="btn on" data-f="all">הכל</button><button type="button" class="btn s" data-f="0">לא פרסמו</button><button type="button" class="btn s" data-f="part">פרסמו חלק</button><button type="button" class="btn s" data-f="done">סיימו</button><button type="button" class="btn wa" id="nx" style="margin-inline-start:auto">שלחי תזכורת לבאה בתור ◀</button></div><div class="tw"><table><thead><tr><th>שם</th><th>עסק 1</th><th>עסק 2</th><th>עסק 3</th><th>תזכורת</th></tr></thead><tbody id="tb"></tbody></table></div></div>
+<div id="v1"><div id="flt" style="display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px"><button type="button" class="btn s" data-f="all">הכל</button><button type="button" class="btn on" data-f="0">לא פרסמו</button><button type="button" class="btn s" data-f="part">פרסמו חלק</button><button type="button" class="btn s" data-f="done">סיימו</button><button type="button" class="btn wa" id="nx" style="margin-inline-start:auto">שלחי תזכורת לבאה בתור ◀</button></div><div class="tw"><table><thead><tr><th>שם</th><th>עסק 1</th><th>עסק 2</th><th>תזכורת</th></tr></thead><tbody id="tb"></tbody></table></div></div>
 <div id="v2" hidden></div>
 <div id="v3" hidden></div>
 </div></div>
@@ -103,7 +103,7 @@ $("sh").onchange=()=>{$("pw").type=$("ac").type=$("sh").checked?"text":"password
 $("go").onclick=async()=>{$("err").textContent="";const pl=$("pw").value.trim().length;try{try{await unlock($("pw").value.trim())}catch(x){throw "pw"}AC=$("ac").value.trim();await load();if($("rm").checked){try{localStorage.setItem("kn_mgr",JSON.stringify({pw:PW,ac:AC}))}catch(x){}}$("gate").hidden=true;$("app").hidden=false}catch(e){$("err").textContent=e==="pw"?"סיסמת הדף (השדה הראשון) לא נכונה. הוקלדו "+pl+" תווים, צריך 14.":e===401?"סיסמת הדף נכונה ✓ אבל קוד המנהלת (השדה השני) לא תואם למה שמוגדר ב-Supabase.":"משהו השתבש בטעינה ("+e+"). נסי לרענן."}};
 ["pw","ac"].forEach(i=>$(i).addEventListener("keydown",e=>{if(e.key==="Enter")$("go").click()}));
 $("rf").onclick=()=>load();
-window.FLT="all";
+window.FLT="0";
 function applyF(){document.querySelectorAll("#tb tr").forEach(r=>{r.hidden=!(FLT==="all"||r.dataset.s===FLT)});document.querySelectorAll("#flt [data-f]").forEach(b=>b.className=b.dataset.f===FLT?"btn on":"btn s")}
 document.querySelectorAll("#flt [data-f]").forEach(b=>b.onclick=()=>{FLT=b.dataset.f;applyF()});
 $("nx").onclick=()=>{const a=[...document.querySelectorAll("#tb tr:not([hidden]) a.wa")].find(x=>!x.dataset.sent);if(!a){$("nx").textContent="אין עוד תזכורות ברשימה ✓";return}a.dataset.sent=1;a.textContent="נשלחה ✓";a.style.opacity=".6";window.open(a.href,"_blank")}
