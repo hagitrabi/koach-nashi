@@ -79,7 +79,7 @@ let round='a';
 async function call(o){const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(o)});if(!r.ok)throw r.status;return r.json()}
 const msg=(p,n,kind)=>"היי "+n.replace(/\(.*?\)/g,"").trim().split(/\s+/)[0]+" 🌸 תזכורת קטנה, עוד לא אישרת פרסום של "+kind+" בסבב מוצ״ש. את מפרסמת כאן: "+location.origin+"/koach-nashi/t/ls01x4y8xaz1/ . תודה רבה!";
 async function load(){
-  const {rows}=await call({action:"status",admin:AC});ROWS=rows;try{const {rows:cs}=await call({action:"contacts",admin:AC});PH={};cs.forEach(c=>PH[c.name]=c.phone)}catch(e){}const done={};rows.forEach(r=>{if(r.done)done[r.who+">"+r.biz]=1});
+  const {rows}=await call({action:"status",admin:AC});ROWS=rows;try{const {rows:cs}=await call({action:"contacts",admin:AC});PH={};cs.forEach(c=>PH[c.name]=c.phone)}catch(e){}const done={};rows.forEach(r=>{if(r.done)done[r.who+">"+r.biz]=1});window.DN=done;
   let ok=0,wait=0,fin=0;const tb=$("tb");tb.innerHTML="";
   D.rounds.a.forEach(([w,...Z])=>{const tr=document.createElement("tr"),ds=Z.map(i=>!!done[P[w].n+">"+P[i].n]),k=ds.filter(Boolean).length;tr.dataset.s=k===Z.length?"done":k?"part":"0";ok+=k;wait+=Z.length-k;if(k===Z.length)fin++;
     const td0=document.createElement("td");td0.innerHTML="<b></b><div class=mut></div>";td0.firstChild.textContent=P[w].n;td0.lastChild.textContent=P[w].f||"";tr.append(td0);
@@ -113,10 +113,10 @@ $("vw").onclick=()=>{sessionStorage.setItem("kn_view",JSON.stringify({pw:PW}));l
 (async()=>{try{let s=JSON.parse(sessionStorage.getItem("kn_adm")||"null");if(!s){try{s=JSON.parse(localStorage.getItem("kn_mgr")||"null")}catch(x){}if(!s)return}else sessionStorage.removeItem("kn_adm");await unlock(s.pw);AC=s.ac;await load();$("gate").hidden=true;$("app").hidden=false}catch(e){}})();
 const tabs=()=>{[["t1","v1"],["t2","v2"],["t3","v3"]].forEach(([t,v],k)=>{$(v).hidden=k!==CUR;$(t).className=k===CUR?"btn on":"btn s"})};let CUR=0;
 $("t1").onclick=()=>{CUR=0;tabs()};$("t2").onclick=()=>{CUR=1;tabs()};
-$("t3").onclick=async()=>{CUR=2;tabs();const v=$("v3");if(v.dataset.ok)return;v.innerHTML='<div class="mut" style="padding:20px;text-align:center">טוענת קבצים...</div>';
+$("t3").onclick=async()=>{CUR=2;tabs();const v=$("v3");if(v.dataset.ok){mstat();return}v.innerHTML='<div class="mut" style="padding:20px;text-align:center">טוענת קבצים...</div>';
   const out=document.createElement("div");let total=0;
   for(const p of P){let files=[];try{files=(await call({pw:PW,id:p.d})).files||[]}catch(e){}
-    total+=files.length;const c=document.createElement("div");c.className="rg";
+    total+=files.length;const c=document.createElement("div");c.className="rg";{const i=P.indexOf(p),row=D.rounds.a.find(r=>r[0]===i)||[i],k=row.slice(1).filter(t=>(window.DN||{})[p.n+">"+P[t].n]).length;c.dataset.s=k>=2?"done":k===1?"part":"none";c.dataset.nw=i>=27?"1":"0";c.dataset.fc=files.length}
     const h=document.createElement("b");h.textContent=p.n+" · "+(p.f||"");const m=document.createElement("div");m.className="mut";m.textContent=files.length?files.length+" קבצים":"אין קבצים";c.append(h,m);
     const g=document.createElement("div");g.style.cssText="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:8px";
     files.forEach(f=>{const a=document.createElement("a");a.href=f.view;a.target="_blank";a.rel="noopener";a.style.cssText="display:block;background:#0003;border-radius:12px;overflow:hidden;text-decoration:none;color:inherit;text-align:center";
@@ -124,5 +124,15 @@ $("t3").onclick=async()=>{CUR=2;tabs();const v=$("v3");if(v.dataset.ok)return;v.
       const l=document.createElement("div");l.className="mut";l.style.cssText="font-size:11px;padding:4px";l.textContent=f.name;a.append(l);g.append(a)});
     c.append(g);if(files.length){const del=document.createElement("a");del.className="btn s";del.target="_blank";del.rel="noopener";del.style.cssText="margin-top:10px;display:inline-flex;font-size:13px;min-height:38px;padding:0 12px";del.href="https://supabase.com/dashboard/project/nkmjdrfqlsgrrndluzxa/storage/files/buckets/materials";del.textContent="🗑 למחיקה: פתיחת האחסון ב-Supabase (תיקייה: "+p.d.slice(0,10)+"…)";c.append(del)}
     out.append(c)}
-  v.innerHTML="";v.append(out);v.dataset.ok="1"};
+  v.innerHTML="";const bar=document.createElement("div");bar.id="mbar";v.append(bar,out);v.dataset.ok="1";mstat()};
+window.MF="all";
+function mstat(){const cs=[...document.querySelectorAll("#v3 .rg")];const n=f=>cs.filter(f).length;
+  const done=n(c=>c.dataset.s==="done"),part=n(c=>c.dataset.s==="part"),oldNone=n(c=>c.dataset.s==="none"&&c.dataset.nw==="0"),neu=n(c=>c.dataset.nw==="1");
+  const bar=document.getElementById("mbar");if(!bar)return;bar.innerHTML="";
+  const sum=document.createElement("div");sum.style.cssText="background:#ffffff12;border-radius:14px;padding:12px 14px;margin:0 0 10px;line-height:1.8;font-size:14px";
+  sum.innerHTML="<b>סה״כ רשומות במערכת: "+cs.length+"</b><br>פרסמו 2/2: "+done+" · פרסמו חלק: "+part+" · חדשות שנרשמו: "+neu+" · ישנות שלא פרסמו: "+oldNone+"<br><b>צפויות להיכנס לסבב הבא: "+(done+part+neu)+"</b> · מחוץ לסבב הבא: "+oldNone;
+  const row=document.createElement("div");row.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px";
+  [["all","הכל ("+cs.length+")"],["done","פרסמו 2/2 ("+done+")"],["part","פרסמו חלק ("+part+")"],["old","ישנות שלא פרסמו ("+oldNone+")"],["nw","חדשות ("+neu+")"],["nofile","ללא קבצים ("+n(c=>c.dataset.fc==="0")+")"]].forEach(([k,t])=>{const b=document.createElement("button");b.type="button";b.className=k===MF?"btn on":"btn s";b.textContent=t;b.onclick=()=>{MF=k;mstat()};row.append(b)});
+  bar.append(sum,row);
+  cs.forEach(c=>{const s=c.dataset.s,nw=c.dataset.nw==="1";c.hidden=!(MF==="all"||(MF==="done"&&s==="done")||(MF==="part"&&s==="part")||(MF==="old"&&s==="none"&&!nw)||(MF==="nw"&&nw)||(MF==="nofile"&&c.dataset.fc==="0"))})}
 </script></body></html>
