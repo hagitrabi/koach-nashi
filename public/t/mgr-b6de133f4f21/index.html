@@ -53,7 +53,7 @@ async function mergeLate(){
     const W=s=>N(s).split(" ").filter(t=>t.length>=4);
     const clash=(a,b)=>{const x=W(P[a].f);return W(P[b].f).some(t=>x.includes(t))};
     for(const x of rows){
-      if(x.at&&x.at<"2026-11-13T06:14:14Z")continue;
+      if(x.at&&x.at<"2999-01-01T00:00:00Z")continue; /* this round is closed: new registrants wait for the next round */
       if(P.some(p=>p.d===x.key))continue;
       const nn=N(x.name);if(!nn)continue;
       if(P.some(p=>{const q=N(p.n);return q===nn||(nn.length>=4&&q.length>=4&&(q.includes(nn)||nn.includes(q)))}))continue;
