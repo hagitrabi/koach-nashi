@@ -88,7 +88,7 @@ async function load(){
     Z.forEach((i,j)=>{const t=document.createElement("td");t.innerHTML='<div></div><span class="st '+(ds[j]?"ok":"wt")+'">'+(ds[j]?"✓ פורסם":"ממתין")+"</span><div class=mut style=font-size:12px></div>";t.firstChild.textContent=P[i].n;{const dd=!!DLD[P[w].n+">"+P[i].n];t.lastChild.textContent=dd?"⬇ הורידה חומרים":"לא הורידה חומרים";if(!dd&&!ds[j])t.lastChild.style.opacity=".7";if(ds[j]&&!dd){t.lastChild.textContent="⚠ סימנה בלי להוריד";t.lastChild.style.color="var(--red,#f87171)"}}tr.append(t)});
     const tw=document.createElement("td");if(k<Z.length&&PH[P[w].n]){const x=document.createElement("a");x.className="btn wa";x.target="_blank";x.rel="noopener";x.textContent="שלחי תזכורת";
       x.href="https://wa.me/"+PH[P[w].n]+"?text="+encodeURIComponent(msg(PH[P[w].n],P[w].n,k?"חלק מהעסקים":"העסקים"));tw.append(x)}else tw.textContent=k===Z.length?"✓":"";tr.append(tw);tb.append(tr)});
-  applyF();$("n1").textContent=fin;$("n2").textContent=P.length-fin;$("n3").textContent=P.length;$("upd").textContent="עודכן "+new Date().toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"});
+  applyF();$("n1").textContent=fin;$("n2").textContent=D.rounds.a.length-fin;$("n3").textContent=D.rounds.a.length;$("upd").textContent="עודכן "+new Date().toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"});
   try{const {rows:rg}=await call({action:"regs",admin:AC});const v=$("v2");v.innerHTML="";
     
     const lev=(x,y)=>{const m=[...Array(y.length+1)].map((_,j)=>j);for(let i=1;i<=x.length;i++){let p=m[0];m[0]=i;for(let j=1;j<=y.length;j++){const t=m[j];m[j]=Math.min(m[j]+1,m[j-1]+1,p+(x[i-1]===y[j-1]?0:1));p=t}}return m[y.length]};
