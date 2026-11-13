@@ -153,12 +153,14 @@ async function openFiles(i){
       let m;
       if(f.type==="video"){m=document.createElement("video");m.controls=true;m.preload="metadata";m.playsInline=true;m.src=f.view}
       else{m=document.createElement("img");m.alt="";m.loading="lazy";m.src=f.view}
-      const a=document.createElement("a");a.href=f.dl;a.innerHTML=ARR+"<span>הורדה</span>";a.addEventListener("click",()=>{if(!shown){shown=true;setTimeout(()=>thanks("בזכותך עוד בעלת עסק מקבלת חשיפה","תודה שאת חלק מהקבוצה"),500)}});
+      const a=document.createElement("a");a.href=f.dl;a.innerHTML=ARR+"<span>הורדה</span>";a.addEventListener("click",()=>{markDl(i);if(!shown){shown=true;setTimeout(()=>thanks("בזכותך עוד בעלת עסק מקבלת חשיפה","תודה שאת חלק מהקבוצה"),500)}});
       it.append(m,a);g.append(it)}
   }catch(e){sub.textContent="לא הצלחנו לטעון. נסי לרענן את הדף ולהיכנס שוב."}
 }
 
-let ME=null,VIEW=false,SRV={},POSTED={};try{POSTED=JSON.parse(localStorage.getItem("kn_posted")||"{}")}catch(e){}
+let ME=null,VIEW=false,SRV={},POSTED={},DL={},UPD={};try{POSTED=JSON.parse(localStorage.getItem("kn_posted")||"{}")}catch(e){}
+try{DL=JSON.parse(localStorage.getItem("kn_dl")||"{}")}catch(e){}
+function markDl(i){if(ME===null)return;const k=ME+">"+i;if(!DL[k]){DL[k]=1;try{localStorage.setItem("kn_dl",JSON.stringify(DL))}catch(e){}try{fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({pw:PW,action:"dl",who:P[ME].n,biz:P[i].n})}).catch(()=>{})}catch(e){}}if(UPD[k])UPD[k]()}
 const first=n=>n.replace(/\(.*?\)/g,"").trim().split(/\s+/)[0];
 function greet(){const h=+new Intl.DateTimeFormat("en-GB",{hour:"numeric",hour12:false,timeZone:"Asia/Jerusalem"}).format(new Date())%24;
   return h>=5&&h<12?"בוקר טוב":h>=12&&h<18?"צהריים טובים":h>=18&&h<22?"ערב טוב":"לילה טוב"}
@@ -179,6 +181,7 @@ function copyTxt(t,btn){const done=()=>{const o=btn.textContent;btn.textContent=
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,()=>fb())}else fb();
   function fb(){const a=document.createElement("textarea");a.value=t;document.body.append(a);a.select();try{document.execCommand("copy")}catch(e){}a.remove();done()}}
 function bizCard(i,w){
+  let HT=null;
   const d=document.createElement("div");d.className="biz";
   const n=document.createElement("div");n.className="bn";n.textContent="📁 "+P[i].n;
   const f=document.createElement("div");f.className="bf";f.textContent=P[i].f||"";
@@ -188,15 +191,16 @@ function bizCard(i,w){
   r.append(a);
   if(w!==undefined&&VIEW){const on=!!SRV[P[w].n+">"+P[i].n],pb=document.createElement("button");pb.type="button";pb.disabled=true;pb.style.cursor="default";pb.className="btn "+(on?"done":"s");pb.textContent=on?"✓ פרסמה":"עוד לא פרסמה";r.append(pb)}
   else if(w!==undefined){const k=w+">"+i,pb=document.createElement("button");pb.type="button";pb.className="btn s";
-    const set=()=>{const on=!!POSTED[k];pb.className="btn "+(on?"done":"s");pb.textContent=on?"✓ פרסמתי":"פרסמתי"};set();
+    const hint=document.createElement("div");hint.style.cssText="width:100%;margin-top:6px;font-size:13px;color:var(--mut);text-align:center";hint.textContent="כדי ללחוץ פרסמתי, קודם צריך להוריד את החומרים של העסק";
+    const set=()=>{const on=!!POSTED[k],ok=on||!!DL[k];pb.disabled=!ok;pb.style.opacity=ok?"":".45";hint.hidden=ok;pb.className="btn "+(on?"done":"s");pb.textContent=on?"✓ פרסמתי":"פרסמתי"};set();UPD[k]=set;
     pb.onclick=()=>{POSTED[k]=!POSTED[k];if(!POSTED[k])delete POSTED[k];try{localStorage.setItem("kn_posted",JSON.stringify(POSTED))}catch(e){}
       set();prog();report(w,i,!!POSTED[k]).then(loadBoard);if(POSTED[k])thanks("איזה כיף! תודה שפרסמת","בזכותך עוד בעלת עסק קיבלה חשיפה")};
-    r.append(pb)}
+    r.append(pb);HT=hint}
   if(P[i].l){const lk=document.createElement("button");lk.type="button";lk.className="btn s";lk.style.cssText="width:100%;margin-top:8px";lk.textContent="💬 העתקת קישור לוואטסאפ";
     lk.onclick=()=>{const t=P[i].l;const ok=()=>{lk.textContent="✓ הקישור הועתק";setTimeout(()=>lk.textContent="💬 העתקת קישור לוואטסאפ",2000)};
       if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,()=>window.open(t,"_blank"));else window.open(t,"_blank")};
-    d.append(n,f,r,lk);return d}
-  d.append(n,f,r);return d}
+    d.append(n,f,r);if(HT)d.append(HT);d.append(lk);return d}
+  d.append(n,f,r);if(HT)d.append(HT);return d}
 function render(){
   const el=document.getElementById("list"); el.innerHTML="";
   if(ME!==null){
