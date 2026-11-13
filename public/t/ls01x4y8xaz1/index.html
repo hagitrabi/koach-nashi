@@ -237,14 +237,20 @@ function render(){
 document.getElementById("q").addEventListener("input",render);
 
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+let SESS=null;
+const toB64=u=>btoa(String.fromCharCode(...new Uint8Array(u)));
+async function loginSrv(pw,admin){try{const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"login",pw,admin:admin||undefined})});return r.ok?await r.json():null}catch(e){return null}}
+async function decWith(key){const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(ENC.v)},key,b64(ENC.c));D=JSON.parse(new TextDecoder().decode(pt));P=D.people}
+async function unlockKey(pw){const km=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveKey"]);
+  const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(ENC.s),iterations:ENC.i,hash:"SHA-256"},km,{name:"AES-GCM",length:256},true,["decrypt"]);
+  await decWith(key);return toB64(await crypto.subtle.exportKey("raw",key))}
+async function unlockSaved(s){if(!s||!s.k||!s.t)throw 0;const key=await crypto.subtle.importKey("raw",b64(s.k),"AES-GCM",false,["decrypt"]);await decWith(key);PW=s.t;SESS={k:s.k,t:s.t,a:s.a}}
 async function unlock(pw){
   if(Date.now()>ENC.x) throw new Error('expired');
-  const km=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveKey"]);
-  const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(ENC.s),iterations:ENC.i,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["decrypt"]);
-  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(ENC.v)},key,b64(ENC.c));
-  D=JSON.parse(new TextDecoder().decode(pt)); P=D.people; PW=pw;
-  
+  const k=await unlockKey(pw);const l=await loginSrv(pw);
+  if(l&&l.tok){PW=l.tok;SESS={k,t:l.tok}}else{PW=pw;SESS=null}
 }
+function saveS(){try{if(SESS)localStorage.setItem("kn_s",JSON.stringify(SESS))}catch(e){}}
 
 
 async function mergeLate(){
@@ -320,14 +326,15 @@ function enterView(){
   const ob=document.createElement("button");ob.type="button";ob.className="out";ob.textContent="חזרה לניהול";ob.onclick=()=>{location.href="../mgr-b6de133f4f21/"};row.append(h,ob);hi.append(row);
   document.getElementById("hello").hidden=true;document.getElementById("bar").hidden=false;document.getElementById("stats").hidden=false;
   document.getElementById("cnt").textContent=D.rounds[round].length;render();loadBoard();loadSrv()}
-function logout(){try{localStorage.removeItem("kn_pw");localStorage.removeItem("kn_who")}catch(e){}location.reload()}
+function logout(){try{localStorage.removeItem("kn_pw");localStorage.removeItem("kn_s");localStorage.removeItem("kn_who")}catch(e){}location.reload()}
 function resolveName(txt){
   const q=norm(txt);if(!q)return[];
   const ids=D.rounds[round].map(r=>r[0]);
   const ex=ids.filter(w=>norm(P[w].n)===q);if(ex.length===1)return ex;
   return ids.filter(w=>norm(P[w].n).includes(q))}
+async function tryS(sv){try{await unlockSaved(sv);const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({pw:PW,action:"board"})});if(r.status===401)throw 0;await mergeLate();return true}catch(e){return false}}
 async function tryPw(pw,remember){
-  try{ await unlock(pw);await mergeLate(); if(remember){try{localStorage.setItem("kn_pw",pw)}catch(e){}} return true }
+  try{ await unlock(pw);await mergeLate(); if(remember)saveS(); return true }
   catch(e){ return false }
 }
 document.getElementById("go").onclick=async()=>{
@@ -336,18 +343,18 @@ document.getElementById("go").onclick=async()=>{
   if(!ok){e.textContent="הסיסמה לא נכונה. נסי שוב.";return}
   const m=resolveName(document.getElementById("nm").value);
   if(m.length===1){enter(m[0]);return}
-  try{localStorage.removeItem("kn_pw")}catch(x){}
+  try{localStorage.removeItem("kn_s")}catch(x){}
   if(!m.length){try{const nm=document.getElementById("nm").value.trim(),r=nm&&await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"status",admin:nm})});
-    if(r&&r.ok){sessionStorage.setItem("kn_adm",JSON.stringify({pw:document.getElementById("pw").value.trim(),ac:nm}));location.href="../mgr-b6de133f4f21/";return}}catch(x){}
+    if(r&&r.ok){{const l=await loginSrv(document.getElementById("pw").value.trim(),nm);if(l&&l.atok&&SESS){sessionStorage.setItem("kn_adm",JSON.stringify({k:SESS.k,t:SESS.t,a:l.atok}));location.href="../mgr-b6de133f4f21/";return}}}}catch(x){}
     e.textContent="לא מצאנו את השם הזה. כתבי את השם כמו שהוא מופיע בקבוצה.";return}
   e.textContent="יש כמה שמות דומים. בחרי את השם שלך:";
   m.forEach(w=>{const b=document.createElement("button");b.type="button";b.textContent=P[w].n;b.style.cssText="min-height:48px;border:0;border-radius:14px;background:var(--card2);color:var(--txt);font-size:16px;font-weight:700;cursor:pointer;font-family:inherit";
-    b.onclick=()=>{try{localStorage.setItem("kn_pw",document.getElementById("pw").value.trim())}catch(x){}enter(w)};pk.append(b)})
+    b.onclick=()=>{saveS();enter(w)};pk.append(b)})
 };
 document.getElementById("nm").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("pw").focus()});
 document.getElementById("pw").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("go").click()});
-(async()=>{try{const v=JSON.parse(sessionStorage.getItem("kn_view")||"null");if(v&&await tryPw(v.pw,false)){enterView();return}}catch(e){}
-  try{const s=localStorage.getItem("kn_pw"),w=localStorage.getItem("kn_who"); if(s&&w!==null&&await tryPw(s,false)){if(D.rounds[round].some(r=>r[0]===+w))enter(+w);else logout()}}catch(e){}})();
+(async()=>{try{const v=JSON.parse(sessionStorage.getItem("kn_view")||"null");if(v&&await tryS(v)){enterView();return}}catch(e){}
+  try{const w=localStorage.getItem("kn_who");let ok=false;const old=localStorage.getItem("kn_pw");if(old){localStorage.removeItem("kn_pw");ok=await tryPw(old,true)}else{const sv=JSON.parse(localStorage.getItem("kn_s")||"null");ok=sv?await tryS(sv):false}if(ok&&w!==null){if(D.rounds[round].some(r=>r[0]===+w))enter(+w);else logout()}}catch(e){}})();
 </script>
 <style>.cr{max-width:1100px;margin:0 auto;padding:6px 16px 34px;text-align:center;color:var(--mut,#9a97bd);font-size:13px}.cr a{display:inline-flex;flex-direction:column;align-items:center;gap:8px;color:inherit;text-decoration:none;padding:10px 18px;border-radius:16px;transition:transform .18s ease,background-color .18s ease,box-shadow .18s ease}.cr a:hover{transform:translateY(-2px);background:rgba(183,156,255,.1);box-shadow:0 8px 22px rgba(124,92,255,.25)}.cr a:active{transform:scale(.97)}.cr a:focus-visible{outline:3px solid #ff4d8d;outline-offset:2px}.cr img{height:52px;width:auto}@media(max-width:999px){
  body.side>#board{position:fixed;top:0;bottom:0;left:0;width:min(88vw,340px);margin:0;border-radius:0 22px 22px 0;z-index:60;overflow:auto;transform:translateX(-105%);transition:transform .28s ease;box-shadow:0 0 40px #000a}

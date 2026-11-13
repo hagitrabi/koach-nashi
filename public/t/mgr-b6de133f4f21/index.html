@@ -40,9 +40,18 @@ const ENC={"x": 1796842800000, "s": "11mjmPqGTVyNdbuhHzqk4Q==", "v": "OPLfyY6CmO
 const API="https://nkmjdrfqlsgrrndluzxa.supabase.co/functions/v1/get-files";
 let D,P,PW="",AC="",ROWS=[],PH={};
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-async function unlock(pw){if(Date.now()>ENC.x)throw 0;const km=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveKey"]);
- const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(ENC.s),iterations:ENC.i,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["decrypt"]);
- D=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(ENC.v)},key,b64(ENC.c))));P=D.people;PW=pw;await mergeLate()}
+let SESS=null;
+const toB64=u=>btoa(String.fromCharCode(...new Uint8Array(u)));
+async function loginSrv(pw,admin){try{const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"login",pw,admin:admin||undefined})});return r.ok?await r.json():null}catch(e){return null}}
+async function decWith(key){const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(ENC.v)},key,b64(ENC.c));D=JSON.parse(new TextDecoder().decode(pt));P=D.people}
+async function unlockKey(pw){const km=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveKey"]);
+  const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(ENC.s),iterations:ENC.i,hash:"SHA-256"},km,{name:"AES-GCM",length:256},true,["decrypt"]);
+  await decWith(key);return toB64(await crypto.subtle.exportKey("raw",key))}
+async function unlockSaved(s){if(!s||!s.k||!s.t)throw 0;const key=await crypto.subtle.importKey("raw",b64(s.k),"AES-GCM",false,["decrypt"]);await decWith(key);PW=s.t;SESS={k:s.k,t:s.t,a:s.a}}
+async function unlock(pw,admin){if(Date.now()>ENC.x)throw 0;
+ const k=await unlockKey(pw);const l=await loginSrv(pw,admin);
+ if(l&&l.tok){PW=l.tok;AC=l.atok||"x";SESS={k,t:l.tok,a:l.atok}}else{PW=pw;AC=admin||"";SESS=null}
+ await mergeLate()}
 
 async function mergeLate(){
   try{
@@ -103,7 +112,7 @@ async function load(){
       const n=document.createElement("b");n.textContent=r.full_name+" · "+r.business;d.append(tag,n,t("תחום",r.field),t("עיר",r.city),t("וואטסאפ",r.phone),t("אימייל",r.email),t("משפט",r.sentence||""),t("אישור תנאים",r.consent?"✓ אישרה":"לא"),t("נרשמה",new Date(r.created_at).toLocaleString("he-IL")));v.append(d)})}catch(e){}
 }
 $("sh").onchange=()=>{$("pw").type=$("ac").type=$("sh").checked?"text":"password"};
-$("go").onclick=async()=>{$("err").textContent="";const pl=$("pw").value.trim().length;try{try{await unlock($("pw").value.trim())}catch(x){throw "pw"}AC=$("ac").value.trim();await load();if($("rm").checked){try{localStorage.setItem("kn_mgr",JSON.stringify({pw:PW,ac:AC}))}catch(x){}}$("gate").hidden=true;$("app").hidden=false}catch(e){$("err").textContent=e==="pw"?"סיסמת הדף (השדה הראשון) לא נכונה. הוקלדו "+pl+" תווים, צריך 14.":e===401?"סיסמת הדף נכונה ✓ אבל קוד המנהלת (השדה השני) לא תואם למה שמוגדר ב-Supabase.":"משהו השתבש בטעינה ("+e+"). נסי לרענן."}};
+$("go").onclick=async()=>{$("err").textContent="";const pl=$("pw").value.trim().length;try{try{await unlock($("pw").value.trim(),$("ac").value.trim())}catch(x){throw "pw"}await load();if($("rm").checked&&SESS&&SESS.a){try{localStorage.setItem("kn_mgr",JSON.stringify(SESS))}catch(x){}}$("gate").hidden=true;$("app").hidden=false}catch(e){$("err").textContent=e==="pw"?"סיסמת הדף (השדה הראשון) לא נכונה. הוקלדו "+pl+" תווים, צריך 14.":e===401?"סיסמת הדף נכונה ✓ אבל קוד המנהלת (השדה השני) לא תואם למה שמוגדר ב-Supabase.":"משהו השתבש בטעינה ("+e+"). נסי לרענן."}};
 ["pw","ac"].forEach(i=>$(i).addEventListener("keydown",e=>{if(e.key==="Enter")$("go").click()}));
 $("rf").onclick=()=>load();
 window.FLT="0";
@@ -111,8 +120,8 @@ function applyF(){document.querySelectorAll("#tb tr").forEach(r=>{r.hidden=!(FLT
 document.querySelectorAll("#flt [data-f]").forEach(b=>b.onclick=()=>{FLT=b.dataset.f;applyF()});
 $("nx").onclick=()=>{const a=[...document.querySelectorAll("#tb tr:not([hidden]) a.wa")].find(x=>!x.dataset.sent);if(!a){$("nx").textContent="אין עוד תזכורות ברשימה ✓";return}a.dataset.sent=1;a.textContent="נשלחה ✓";a.style.opacity=".6";window.open(a.href,"_blank")}
 {const lo=document.createElement("button");lo.type="button";lo.className="btn s";lo.textContent="יציאה";lo.onclick=()=>{try{localStorage.removeItem("kn_mgr")}catch(x){}location.reload()};$("rf").after(lo)}
-$("vw").onclick=()=>{sessionStorage.setItem("kn_view",JSON.stringify({pw:PW}));location.href="../ls01x4y8xaz1/"};
-(async()=>{try{let s=JSON.parse(sessionStorage.getItem("kn_adm")||"null");if(!s){try{s=JSON.parse(localStorage.getItem("kn_mgr")||"null")}catch(x){}if(!s)return}else sessionStorage.removeItem("kn_adm");await unlock(s.pw);AC=s.ac;await load();$("gate").hidden=true;$("app").hidden=false}catch(e){}})();
+$("vw").onclick=()=>{sessionStorage.setItem("kn_view",JSON.stringify({k:SESS&&SESS.k,t:SESS&&SESS.t}));location.href="../ls01x4y8xaz1/"};
+(async()=>{try{let s=JSON.parse(sessionStorage.getItem("kn_adm")||"null");if(!s){try{s=JSON.parse(localStorage.getItem("kn_mgr")||"null")}catch(x){}if(!s)return}else sessionStorage.removeItem("kn_adm");if(s.pw){await unlock(s.pw,s.ac);try{localStorage.removeItem("kn_mgr")}catch(x){}}else{await unlockSaved(s);AC=s.a}await load();$("gate").hidden=true;$("app").hidden=false}catch(e){}})();
 const tabs=()=>{[["t1","v1"],["t2","v2"],["t3","v3"],["t4","v4"]].forEach(([t,v],k)=>{$(v).hidden=k!==CUR;$(t).className=k===CUR?"btn on":"btn s"})};let CUR=0;
 $("t4").onclick=()=>{CUR=3;tabs();const v=$("v4"),DN=window.DN||{},R=D.rounds.a;v.innerHTML="";
   const note=document.createElement("div");note.className="mut";note.style.cssText="margin:0 0 10px";note.textContent="חשיפה נספרת רק אחרי שהבת אישרה שפרסמה. השבוע: מה שכבר פורסם מתוך מה שמתוכנן. סבבים קודמים: מה שקיבלה בסבב הקודם. במצטבר: הסכום.";v.append(note);
