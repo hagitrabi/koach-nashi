@@ -136,7 +136,7 @@ $("t3").onclick=async()=>{CUR=2;tabs();const v=$("v3");if(v.dataset.ok){mstat();
   const out=document.createElement("div");let total=0;
   for(const p of P){let files=[];try{files=(await call({pw:PW,id:p.d})).files||[]}catch(e){}
     total+=files.length;const c=document.createElement("div");c.className="rg";{const i=P.indexOf(p),row=D.rounds.a.find(r=>r[0]===i)||[i],k=row.slice(1).filter(t=>(window.DN||{})[p.n+">"+P[t].n]).length;c.dataset.s=k>=2?"done":k===1?"part":"none";c.dataset.nw=i>=27?"1":"0";c.dataset.fc=files.length}
-    const h=document.createElement("b");h.textContent=p.n+" · "+(p.f||"");const m=document.createElement("div");m.className="mut";m.textContent=files.length?files.length+" קבצים":"אין קבצים";c.append(h,m);
+    const h=document.createElement("b");h.textContent=p.n+" · "+(p.f||"");c.dataset.q=NQ(p.n+" "+(p.f||""));const m=document.createElement("div");m.className="mut";m.textContent=files.length?files.length+" קבצים":"אין קבצים";c.append(h,m);
     const g=document.createElement("div");g.style.cssText="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:8px";
     files.forEach(f=>{const a=document.createElement("a");a.href=f.view;a.target="_blank";a.rel="noopener";a.style.cssText="display:block;background:#0003;border-radius:12px;overflow:hidden;text-decoration:none;color:inherit;text-align:center";
       if(f.type==="image"){const i=document.createElement("img");i.loading="lazy";i.src=f.view;i.style.cssText="width:100%;height:120px;object-fit:cover;display:block";a.append(i)}else{const i=document.createElement("div");i.style.cssText="height:120px;display:flex;align-items:center;justify-content:center;font-size:34px";i.textContent="🎬";a.append(i)}
@@ -144,7 +144,8 @@ $("t3").onclick=async()=>{CUR=2;tabs();const v=$("v3");if(v.dataset.ok){mstat();
     c.append(g);if(files.length){const del=document.createElement("a");del.className="btn s";del.target="_blank";del.rel="noopener";del.style.cssText="margin-top:10px;display:inline-flex;font-size:13px;min-height:38px;padding:0 12px";del.href="https://supabase.com/dashboard/project/nkmjdrfqlsgrrndluzxa/storage/files/buckets/materials";del.textContent="🗑 למחיקה: פתיחת האחסון ב-Supabase (תיקייה: "+p.d.slice(0,10)+"…)";c.append(del)}
     out.append(c)}
   v.innerHTML="";const bar=document.createElement("div");bar.id="mbar";v.append(bar,out);v.dataset.ok="1";mstat()};
-window.MF="all";
+window.MF="all";window.MQ="";
+function NQ(t){return String(t||"").normalize("NFKD").replace(/[\u0591-\u05C7]/g,"").replace(/[\u0022\u0027\u05F3\u05F4\u201C\u201D\u2018\u2019]/g,"").toLowerCase().trim()}
 function mstat(){const cs=[...document.querySelectorAll("#v3 .rg")];const n=f=>cs.filter(f).length;
   const done=n(c=>c.dataset.s==="done"),part=n(c=>c.dataset.s==="part"),oldNone=n(c=>c.dataset.s==="none"&&c.dataset.nw==="0"),neu=n(c=>c.dataset.nw==="1");
   const bar=document.getElementById("mbar");if(!bar)return;bar.innerHTML="";
@@ -152,6 +153,9 @@ function mstat(){const cs=[...document.querySelectorAll("#v3 .rg")];const n=f=>c
   sum.innerHTML="<b>סה״כ רשומות במערכת: "+cs.length+"</b><br>פרסמו 2/2: "+done+" · פרסמו חלק: "+part+" · חדשות שנרשמו: "+neu+" · ישנות שלא פרסמו: "+oldNone+"<br><b>צפויות להיכנס לסבב הבא: "+(done+part+neu)+"</b> · מחוץ לסבב הבא: "+oldNone;
   const row=document.createElement("div");row.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px";
   [["all","הכל ("+cs.length+")"],["done","פרסמו 2/2 ("+done+")"],["part","פרסמו חלק ("+part+")"],["old","ישנות שלא פרסמו ("+oldNone+")"],["nw","חדשות ("+neu+")"],["nofile","ללא קבצים ("+n(c=>c.dataset.fc==="0")+")"]].forEach(([k,t])=>{const b=document.createElement("button");b.type="button";b.className=k===MF?"btn on":"btn s";b.textContent=t;b.onclick=()=>{MF=k;mstat()};row.append(b)});
-  bar.append(sum,row);
-  cs.forEach(c=>{const s=c.dataset.s,nw=c.dataset.nw==="1";c.hidden=!(MF==="all"||(MF==="done"&&s==="done")||(MF==="part"&&s==="part")||(MF==="old"&&s==="none"&&!nw)||(MF==="nw"&&nw)||(MF==="nofile"&&c.dataset.fc==="0"))})}
+  if(!window.MS){const w=document.createElement("div");w.style.cssText="position:relative;margin:0 0 10px";const i=document.createElement("input");i.type="search";i.placeholder="🔍 חיפוש עסק או שם…";i.setAttribute("aria-label","חיפוש עסק");i.autocomplete="off";i.style.cssText="width:100%;box-sizing:border-box;padding:12px 14px;font-size:16px;border-radius:12px";i.oninput=()=>{window.MQ=NQ(i.value);mfilter()};w.append(i);window.MS=w}
+  bar.append(sum,window.MS,row);mfilter()}
+function mfilter(){const cs=[...document.querySelectorAll("#v3 .rg")];let shown=0;
+  cs.forEach(c=>{const s=c.dataset.s,nw=c.dataset.nw==="1";c.hidden=!((MF==="all"||(MF==="done"&&s==="done")||(MF==="part"&&s==="part")||(MF==="old"&&s==="none"&&!nw)||(MF==="nw"&&nw)||(MF==="nofile"&&c.dataset.fc==="0"))&&(!window.MQ||(c.dataset.q||"").includes(window.MQ)));if(!c.hidden)shown++});
+  let e=document.getElementById("mempty");if(!e){e=document.createElement("div");e.id="mempty";e.className="mut";e.style.cssText="text-align:center;padding:16px";e.textContent="לא נמצא עסק מתאים";const b=document.getElementById("mbar");if(b)b.after(e)}e.hidden=!(cs.length&&shown===0)}
 </script></body></html>
